@@ -1,21 +1,21 @@
 /* USER CODE BEGIN Header */
 /**
-  ******************************************************************************
-  * @file           : main.c
-  * @brief          : Main program body
-  ******************************************************************************
-  * @attention
-  *
-  * <h2><center>&copy; Copyright (c) 2019 STMicroelectronics.
-  * All rights reserved.</center></h2>
-  *
-  * This software component is licensed by ST under Ultimate Liberty license
-  * SLA0044, the "License"; You may not use this file except in compliance with
-  * the License. You may obtain a copy of the License at:
-  *                             www.st.com/SLA0044
-  *
-  ******************************************************************************
-  */
+ ******************************************************************************
+ * @file           : main.c
+ * @brief          : Main program body
+ ******************************************************************************
+ * @attention
+ *
+ * <h2><center>&copy; Copyright (c) 2019 STMicroelectronics.
+ * All rights reserved.</center></h2>
+ *
+ * This software component is licensed by ST under Ultimate Liberty license
+ * SLA0044, the "License"; You may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at:
+ *                             www.st.com/SLA0044
+ *
+ ******************************************************************************
+ */
 /* USER CODE END Header */
 
 /* Includes ------------------------------------------------------------------*/
@@ -24,7 +24,10 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-#include "lcd.c"
+#include <string.h>
+#include <ff.h>
+#include "debugUI.c"
+#include "scanFile.c"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -43,6 +46,8 @@
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
+DAC_HandleTypeDef hdac;
+
 SD_HandleTypeDef hsd;
 DMA_HandleTypeDef hdma_sdio;
 
@@ -58,6 +63,7 @@ static void MX_GPIO_Init(void);
 static void MX_DMA_Init(void);
 static void MX_FSMC_Init(void);
 static void MX_SDIO_SD_Init(void);
+static void MX_DAC_Init(void);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -100,51 +106,62 @@ int main(void)
   MX_FSMC_Init();
   MX_SDIO_SD_Init();
   MX_FATFS_Init();
+  MX_DAC_Init();
   /* USER CODE BEGIN 2 */
-  LCD_INIT();
+	DebugUI_INIT();
 
 	FATFS myFATAFS;
-	FIL myFILE;
-	UINT testByte;
-	char Fail[] = "Failed";
-	
-	if(f_mount(&myFATAFS, SDPath, 1) == FR_OK)
-	{
-		char AfterMount[] = "Finish Mount";
-		LCD_DrawString(10,10,AfterMount);
-		char myPath[]	= "WRITE1.TXT";
-		f_open(&myFILE, myPath, FA_WRITE | FA_CREATE_ALWAYS);
-		char myData[] = "Hello World";
-		f_write(&myFILE, myData, sizeof(myData), &testByte);
-		f_close(&myFILE);
-		HAL_Delay(1000);
-		char AfterWrite[] = "Finish Write";
-		LCD_DrawString(10,40,AfterWrite);
-	}else
-	{
-		LCD_DrawString(10,10,Fail);
+	FRESULT res;
+
+	res = f_mount(&myFATAFS, SDPath, 1);
+	if (res == FR_OK) {
+		DebugUI_push("Finish Mount");
+		/*
+		 char buff[256];
+		 strcpy(buff, "");
+		 res = scan_files(buff);
+		 */
+		FIL pfile;
+		char myfile[] = "TEST0.wav";
+		BYTE buffer[64];
+		UINT br;
+
+		res = f_open(&pfile, myfile, FA_READ);
+		if (res == FR_OK) {
+			DebugUI_push("Opened");
+			res = f_read(&pfile, buffer, sizeof(buffer), &br);
+			if (res == FR_OK) {
+				DebugUI_push("Read OK");
+			} else {
+				DebugUI_pushValue(res);
+			};
+			res = f_close(&pfile);
+			if (res == FR_OK) {
+				DebugUI_push("Closed");
+			};
+
+		}
+
+		res = f_mount(NULL, SDPath, 1);
+		if (res == FR_OK) {
+			DebugUI_push("Finish Unmount");
+		} else {
+			DebugUI_push("Failed Unmount");
+		}
+	} else {
+		DebugUI_push("Failed Mount");
 	};
 
-	if(f_mount(NULL, SDPath, 1) == FR_OK)
-	{
-		char AfterUnmount[] = "Finish Unmount";
-		LCD_DrawString(10,70,AfterUnmount);
-	}else{
-		LCD_DrawString(10,70,Fail);
-	}
-
-	
-	
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-  while (1)
-  {
+
+	while (1) {
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-  }
+	}
   /* USER CODE END 3 */
 }
 
@@ -186,6 +203,50 @@ void SystemClock_Config(void)
 }
 
 /**
+  * @brief DAC Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_DAC_Init(void)
+{
+
+  /* USER CODE BEGIN DAC_Init 0 */
+
+  /* USER CODE END DAC_Init 0 */
+
+  DAC_ChannelConfTypeDef sConfig = {0};
+
+  /* USER CODE BEGIN DAC_Init 1 */
+
+  /* USER CODE END DAC_Init 1 */
+  /** DAC Initialization 
+  */
+  hdac.Instance = DAC;
+  if (HAL_DAC_Init(&hdac) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /** DAC channel OUT1 config 
+  */
+  sConfig.DAC_Trigger = DAC_TRIGGER_NONE;
+  sConfig.DAC_OutputBuffer = DAC_OUTPUTBUFFER_ENABLE;
+  if (HAL_DAC_ConfigChannel(&hdac, &sConfig, DAC_CHANNEL_1) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /** DAC channel OUT2 config 
+  */
+  if (HAL_DAC_ConfigChannel(&hdac, &sConfig, DAC_CHANNEL_2) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN DAC_Init 2 */
+
+  /* USER CODE END DAC_Init 2 */
+
+}
+
+/**
   * @brief SDIO Initialization Function
   * @param None
   * @retval None
@@ -223,7 +284,7 @@ static void MX_DMA_Init(void)
 
   /* DMA interrupt init */
   /* DMA2_Channel4_5_IRQn interrupt configuration */
-  HAL_NVIC_SetPriority(DMA2_Channel4_5_IRQn, 0, 0);
+  HAL_NVIC_SetPriority(DMA2_Channel4_5_IRQn, 2, 0);
   HAL_NVIC_EnableIRQ(DMA2_Channel4_5_IRQn);
 
 }
@@ -239,10 +300,10 @@ static void MX_GPIO_Init(void)
 
   /* GPIO Ports Clock Enable */
   __HAL_RCC_GPIOC_CLK_ENABLE();
+  __HAL_RCC_GPIOA_CLK_ENABLE();
   __HAL_RCC_GPIOB_CLK_ENABLE();
   __HAL_RCC_GPIOE_CLK_ENABLE();
   __HAL_RCC_GPIOD_CLK_ENABLE();
-  __HAL_RCC_GPIOA_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(LCD_RST_GPIO_Port, LCD_RST_Pin, GPIO_PIN_RESET);
@@ -334,7 +395,7 @@ static void MX_FSMC_Init(void)
 void Error_Handler(void)
 {
   /* USER CODE BEGIN Error_Handler_Debug */
-  /* User can add his own implementation to report the HAL error return state */
+	/* User can add his own implementation to report the HAL error return state */
 
   /* USER CODE END Error_Handler_Debug */
 }

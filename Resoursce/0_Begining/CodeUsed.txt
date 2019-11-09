@@ -1,0 +1,38 @@
+  /* USER CODE BEGIN 2 */
+  LCD_INIT();
+
+	FATFS myFATAFS;
+	FIL myFILE;
+	UINT testByte;
+	char Fail[] = "Failed";
+	
+	if(f_mount(&myFATAFS, SDPath, 1) == FR_OK)
+	{
+		char AfterMount[] = "Finish Mount";
+		LCD_DrawString(10,10,AfterMount);
+		char myPath[]	= "WRITE1.TXT";
+		f_open(&myFILE, myPath, FA_WRITE | FA_CREATE_ALWAYS);
+		char myData[] = "Hello World";
+		f_write(&myFILE, myData, sizeof(myData), &testByte);
+		f_close(&myFILE);
+		HAL_Delay(1000);
+		char AfterWrite[] = "Finish Write";
+		LCD_DrawString(10,40,AfterWrite);
+
+		if(f_mount(NULL, SDPath, 1) == FR_OK)
+		{
+			char AfterUnmount[] = "Finish Unmount";
+			LCD_DrawString(10,70,AfterUnmount);
+		}else{
+			LCD_DrawString(10,70,Fail);
+		}
+
+	}else
+	{
+		LCD_DrawString(10,10,Fail);
+	};
+
+
+	
+	
+  /* USER CODE END 2 */

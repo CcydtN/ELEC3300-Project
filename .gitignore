@@ -1,0 +1,10 @@
+#folder
+Music_Player/Drivers
+Music_Player/Inc
+Music_Player/Middlewares
+Music_Player/MDK-ARM
+TestFile/
+
+#file
+Resoursce/0_Begining/EclipseIDE_Setup/File_needed/*.zip
+Resoursce/0_Begining/EclipseIDE_Setup/File_needed/*.7z
