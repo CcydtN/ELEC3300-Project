@@ -7,7 +7,7 @@
 
 void DebugUI_INIT(void);
 void DebugUI_update(void);
-void DebugUI_push(const char *message);
+void DebugUI_push(char *message);
 void DebugUI_pushValue(int val);
 void DebugUI_test(void);
 

@@ -1,6 +1,7 @@
 #include "lcd.h"
 #include "debugUI.h"
 #include <string.h>
+#include "math.h"
 
 static char line[SIZE][LENGTH];
 static int start, end;
@@ -23,11 +24,11 @@ void DebugUI_update(void) {
 	}
 }
 
-void DebugUI_push(const char *message) {
+void DebugUI_push(char *message) {
 	if (start == end) {
 		start = (start + 1) % SIZE;
 	};
-	strncpy(line[end], message, LENGTH - 1);
+	strncpy(line[end], message, (int) fmin(strlen(message), LENGTH - 1));
 	end = (end + 1) % SIZE;
 	DebugUI_update();
 	if (strlen(message) > LENGTH) {
