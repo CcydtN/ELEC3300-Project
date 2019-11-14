@@ -1,6 +1,10 @@
 #ifndef SRC_EXTRA_WAV_H_
 #define SRC_EXTRA_WAV_H_
 
+typedef enum {
+	OK = 0, END_OF_FILE, FORMAT_ERROR
+} RESULT;
+
 // WAVE file header format
 struct HEADER {
 	char riff[4];						// RIFF string
@@ -19,7 +23,10 @@ struct HEADER {
 };
 
 void wav_INIT(char *fname);
-void getHeader(void);
+RESULT getHeader(void);
+RESULT checkHeader(void);
 void printHeader(void);
+void wav_play(void);
+void TIM_reINIT(void);
 
 #endif /* SRC_EXTRA_WAV_H_ */

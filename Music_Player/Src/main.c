@@ -27,9 +27,10 @@
 #include <string.h>
 #include <ff.h>
 #include "debugUI.c"
-#include "scanFile.c"
+//#include "scanFile.c"
 #include "stdbool.h"
 #include "wav.c"
+#include "math.h"
 
 /* USER CODE END Includes */
 
@@ -49,10 +50,15 @@
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
+ADC_HandleTypeDef hadc1;
+
 DAC_HandleTypeDef hdac;
+DMA_HandleTypeDef hdma_dac_ch1;
+DMA_HandleTypeDef hdma_dac_ch2;
 
 SD_HandleTypeDef hsd;
-DMA_HandleTypeDef hdma_sdio;
+
+TIM_HandleTypeDef htim2;
 
 SRAM_HandleTypeDef hsram1;
 
@@ -67,6 +73,8 @@ static void MX_DMA_Init(void);
 static void MX_FSMC_Init(void);
 static void MX_SDIO_SD_Init(void);
 static void MX_DAC_Init(void);
+static void MX_TIM2_Init(void);
+static void MX_ADC1_Init(void);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -108,37 +116,82 @@ int main(void) {
 	MX_SDIO_SD_Init();
 	MX_FATFS_Init();
 	MX_DAC_Init();
+	MX_TIM2_Init();
+	MX_ADC1_Init();
 	/* USER CODE BEGIN 2 */
+
+	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_5, GPIO_PIN_SET);
 	DebugUI_INIT();
 
-	FATFS myFATAFS;
-	bool mount = false;
-	char myfile[] = "TEST0.wav";
+	/*
+	 FATFS myFATAFS;
+	 bool mount = false;
+	 char myfile[] = "TEST0.wav";
 
-	mount = (f_mount(&myFATAFS, SDPath, 1) == 0);
-	if (mount) {
-		DebugUI_push("Finish Mount");
-	} else {
-		DebugUI_push("Failed Mount");
-	};
-	//
-	wav_INIT(myfile);
-	//
-	if (mount) {
-		mount = !(f_mount(NULL, SDPath, 1) == 0);
-		if (!mount) {
-			DebugUI_push("Finish Unmount");
-		} else {
-			DebugUI_push("Failed Unmount");
-		}
+	 mount = (f_mount(&myFATAFS, SDPath, 1) == 0);
+	 if (mount) {
+	 DebugUI_push("Finish Mount");
+	 } else {
+	 DebugUI_push("Failed Mount");
+	 };
+	 //
+	 wav_INIT(myfile);
+	 //
+	 if (mount) {
+	 mount = !(f_mount(NULL, SDPath, 1) == 0);
+	 if (!mount) {
+	 DebugUI_push("Finish Unmount");
+	 } else {
+	 DebugUI_push("Failed Unmount");
+	 }
+	 }
+	 */
+	uint16_t sine[256];
+	for (int i = 0; i < 256; i++) {
+		sine[i] = (uint16_t) 4095 * (sinf(2 * M_PI / 256 * i) + 1) / 2;
 	}
+
+	//Change timer setting for different tone
+	//the clock frequency == the frequency you want *256
+	//A4 (440Hz)--Prescaler 70 counter 8
+	//A3 (220Hz)--Prescaler 70 counter 17
+	HAL_TIM_Base_DeInit(&htim2);
+	htim2.Init.Prescaler = 70;
+	htim2.Init.Period = 8;
+	HAL_TIM_Base_Init(&htim2);
+	DebugUI_push("Playing 'A4' tone.");
+	HAL_TIM_Base_Start_IT(&htim2);
+	HAL_DAC_Start_DMA(&hdac, DAC_CHANNEL_1, (uint32_t*) sine, 256,
+	DAC_ALIGN_12B_R);
+	HAL_DAC_Start_DMA(&hdac, DAC_CHANNEL_2, (uint32_t*) sine, 256,
+	DAC_ALIGN_12B_R);
 
 	/* USER CODE END 2 */
 
 	/* Infinite loop */
+
 	/* USER CODE BEGIN WHILE */
+	int K1, LastK1 = 0;
 
 	while (1) {
+		K1 = HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_0);
+		if ((K1) && (K1 != LastK1)) {
+			HAL_TIM_Base_Stop(&htim2);
+			HAL_TIM_Base_DeInit(&htim2);
+			htim2.Init.Period = 17;
+			HAL_TIM_Base_Init(&htim2);
+			DebugUI_push("Playing 'A3' tone.");
+			HAL_TIM_Base_Start_IT(&htim2);
+		}
+		if ((!K1) && (K1 != LastK1)) {
+			HAL_TIM_Base_Stop(&htim2);
+			HAL_TIM_Base_DeInit(&htim2);
+			htim2.Init.Period = 8;
+			HAL_TIM_Base_Init(&htim2);
+			DebugUI_push("Playing 'A4' tone.");
+			HAL_TIM_Base_Start_IT(&htim2);
+		}
+		LastK1 = K1;
 		/* USER CODE END WHILE */
 
 		/* USER CODE BEGIN 3 */
@@ -153,6 +206,7 @@ int main(void) {
 void SystemClock_Config(void) {
 	RCC_OscInitTypeDef RCC_OscInitStruct = { 0 };
 	RCC_ClkInitTypeDef RCC_ClkInitStruct = { 0 };
+	RCC_PeriphCLKInitTypeDef PeriphClkInit = { 0 };
 
 	/** Initializes the CPU, AHB and APB busses clocks
 	 */
@@ -178,6 +232,53 @@ void SystemClock_Config(void) {
 	if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_2) != HAL_OK) {
 		Error_Handler();
 	}
+	PeriphClkInit.PeriphClockSelection = RCC_PERIPHCLK_ADC;
+	PeriphClkInit.AdcClockSelection = RCC_ADCPCLK2_DIV6;
+	if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInit) != HAL_OK) {
+		Error_Handler();
+	}
+}
+
+/**
+ * @brief ADC1 Initialization Function
+ * @param None
+ * @retval None
+ */
+static void MX_ADC1_Init(void) {
+
+	/* USER CODE BEGIN ADC1_Init 0 */
+
+	/* USER CODE END ADC1_Init 0 */
+
+	ADC_ChannelConfTypeDef sConfig = { 0 };
+
+	/* USER CODE BEGIN ADC1_Init 1 */
+
+	/* USER CODE END ADC1_Init 1 */
+	/** Common config
+	 */
+	hadc1.Instance = ADC1;
+	hadc1.Init.ScanConvMode = ADC_SCAN_DISABLE;
+	hadc1.Init.ContinuousConvMode = DISABLE;
+	hadc1.Init.DiscontinuousConvMode = DISABLE;
+	hadc1.Init.ExternalTrigConv = ADC_SOFTWARE_START;
+	hadc1.Init.DataAlign = ADC_DATAALIGN_RIGHT;
+	hadc1.Init.NbrOfConversion = 1;
+	if (HAL_ADC_Init(&hadc1) != HAL_OK) {
+		Error_Handler();
+	}
+	/** Configure Regular Channel
+	 */
+	sConfig.Channel = ADC_CHANNEL_6;
+	sConfig.Rank = ADC_REGULAR_RANK_1;
+	sConfig.SamplingTime = ADC_SAMPLETIME_1CYCLE_5;
+	if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK) {
+		Error_Handler();
+	}
+	/* USER CODE BEGIN ADC1_Init 2 */
+
+	/* USER CODE END ADC1_Init 2 */
+
 }
 
 /**
@@ -204,8 +305,8 @@ static void MX_DAC_Init(void) {
 	}
 	/** DAC channel OUT1 config
 	 */
-	sConfig.DAC_Trigger = DAC_TRIGGER_NONE;
-	sConfig.DAC_OutputBuffer = DAC_OUTPUTBUFFER_ENABLE;
+	sConfig.DAC_Trigger = DAC_TRIGGER_T2_TRGO;
+	sConfig.DAC_OutputBuffer = DAC_OUTPUTBUFFER_DISABLE;
 	if (HAL_DAC_ConfigChannel(&hdac, &sConfig, DAC_CHANNEL_1) != HAL_OK) {
 		Error_Handler();
 	}
@@ -248,6 +349,48 @@ static void MX_SDIO_SD_Init(void) {
 }
 
 /**
+ * @brief TIM2 Initialization Function
+ * @param None
+ * @retval None
+ */
+static void MX_TIM2_Init(void) {
+
+	/* USER CODE BEGIN TIM2_Init 0 */
+
+	/* USER CODE END TIM2_Init 0 */
+
+	TIM_ClockConfigTypeDef sClockSourceConfig = { 0 };
+	TIM_MasterConfigTypeDef sMasterConfig = { 0 };
+
+	/* USER CODE BEGIN TIM2_Init 1 */
+
+	/* USER CODE END TIM2_Init 1 */
+	htim2.Instance = TIM2;
+	htim2.Init.Prescaler = 0;
+	htim2.Init.CounterMode = TIM_COUNTERMODE_UP;
+	htim2.Init.Period = 0;
+	htim2.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+	htim2.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+	if (HAL_TIM_Base_Init(&htim2) != HAL_OK) {
+		Error_Handler();
+	}
+	sClockSourceConfig.ClockSource = TIM_CLOCKSOURCE_INTERNAL;
+	if (HAL_TIM_ConfigClockSource(&htim2, &sClockSourceConfig) != HAL_OK) {
+		Error_Handler();
+	}
+	sMasterConfig.MasterOutputTrigger = TIM_TRGO_UPDATE;
+	sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
+	if (HAL_TIMEx_MasterConfigSynchronization(&htim2, &sMasterConfig)
+			!= HAL_OK) {
+		Error_Handler();
+	}
+	/* USER CODE BEGIN TIM2_Init 2 */
+
+	/* USER CODE END TIM2_Init 2 */
+
+}
+
+/**
  * Enable DMA controller clock
  */
 static void MX_DMA_Init(void) {
@@ -255,8 +398,11 @@ static void MX_DMA_Init(void) {
 	__HAL_RCC_DMA2_CLK_ENABLE();
 
 	/* DMA interrupt init */
+	/* DMA2_Channel3_IRQn interrupt configuration */
+	HAL_NVIC_SetPriority(DMA2_Channel3_IRQn, 0, 0);
+	HAL_NVIC_EnableIRQ(DMA2_Channel3_IRQn);
 	/* DMA2_Channel4_5_IRQn interrupt configuration */
-	HAL_NVIC_SetPriority(DMA2_Channel4_5_IRQn, 2, 0);
+	HAL_NVIC_SetPriority(DMA2_Channel4_5_IRQn, 0, 0);
 	HAL_NVIC_EnableIRQ(DMA2_Channel4_5_IRQn);
 
 }
@@ -277,17 +423,23 @@ static void MX_GPIO_Init(void) {
 	__HAL_RCC_GPIOD_CLK_ENABLE();
 
 	/*Configure GPIO pin Output Level */
-	HAL_GPIO_WritePin(LCD_RST_GPIO_Port, LCD_RST_Pin, GPIO_PIN_RESET);
+	HAL_GPIO_WritePin(GPIOB, LCD_RST_Pin | Test_LED_Pin, GPIO_PIN_RESET);
 
 	/*Configure GPIO pin Output Level */
 	HAL_GPIO_WritePin(LCD_BL_GPIO_Port, LCD_BL_Pin, GPIO_PIN_RESET);
 
-	/*Configure GPIO pin : LCD_RST_Pin */
-	GPIO_InitStruct.Pin = LCD_RST_Pin;
+	/*Configure GPIO pin : K1_Pin */
+	GPIO_InitStruct.Pin = K1_Pin;
+	GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+	GPIO_InitStruct.Pull = GPIO_NOPULL;
+	HAL_GPIO_Init(K1_GPIO_Port, &GPIO_InitStruct);
+
+	/*Configure GPIO pins : LCD_RST_Pin Test_LED_Pin */
+	GPIO_InitStruct.Pin = LCD_RST_Pin | Test_LED_Pin;
 	GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
 	GPIO_InitStruct.Pull = GPIO_NOPULL;
 	GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
-	HAL_GPIO_Init(LCD_RST_GPIO_Port, &GPIO_InitStruct);
+	HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
 	/*Configure GPIO pin : LCD_BL_Pin */
 	GPIO_InitStruct.Pin = LCD_BL_Pin;
@@ -364,7 +516,7 @@ static void MX_FSMC_Init(void) {
 void Error_Handler(void) {
 	/* USER CODE BEGIN Error_Handler_Debug */
 	/* User can add his own implementation to report the HAL error return state */
-
+	DebugUI_push("Oops");
 	/* USER CODE END Error_Handler_Debug */
 }
 

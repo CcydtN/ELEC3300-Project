@@ -28,7 +28,9 @@ void DebugUI_push(char *message) {
 	if (start == end) {
 		start = (start + 1) % SIZE;
 	};
-	strncpy(line[end], message, (int) fmin(strlen(message), LENGTH - 1));
+	int n = (int) fmin(strlen(message), LENGTH - 1);
+	strncpy(line[end], message, n);
+	line[end][n] = '\0';
 	end = (end + 1) % SIZE;
 	DebugUI_update();
 	if (strlen(message) > LENGTH) {
