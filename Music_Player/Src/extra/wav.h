@@ -5,6 +5,9 @@ typedef enum {
 	OK = 0, END_OF_FILE, FORMAT_ERROR
 } RESULT;
 
+extern DAC_HandleTypeDef hdac;
+extern TIM_HandleTypeDef htim2;
+
 // WAVE file header format
 struct HEADER {
 	char riff[4];						// RIFF string
@@ -22,11 +25,13 @@ struct HEADER {
 	unsigned int data_size;	// NumSamples * NumChannels * BitsPerSample/8 - size of the next chunk that will be read
 };
 
-void wav_INIT(char *fname);
+void wavPlayer(char *fname);
 RESULT getHeader(void);
 RESULT checkHeader(void);
 void printHeader(void);
-void wav_play(void);
-void TIM_reINIT(void);
+void TIM_reINIT(uint16_t psc, uint16_t arr);
+void getSample(void);
+void Start_DMA(void);
+void closefile(void);
 
 #endif /* SRC_EXTRA_WAV_H_ */

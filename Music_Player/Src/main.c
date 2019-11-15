@@ -63,8 +63,9 @@ TIM_HandleTypeDef htim2;
 SRAM_HandleTypeDef hsram1;
 
 /* USER CODE BEGIN PV */
-static uint16_t sine[256];
 
+//static short int sine[2][256];
+//static uint8_t psine = 0;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -83,15 +84,14 @@ static void MX_ADC1_Init(void);
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 
-void HAL_DAC_ConvCpltCallbackCh1(DAC_HandleTypeDef *hdac) {
-	HAL_TIM_Base_Stop_IT(&htim2);
-	HAL_DAC_Start_DMA(hdac, DAC_CHANNEL_1, (uint32_t*) sine, 256,
-	DAC_ALIGN_12B_R);
-	HAL_DAC_Start_DMA(hdac, DAC_CHANNEL_2, (uint32_t*) sine, 256,
-	DAC_ALIGN_12B_R);
-	HAL_TIM_Base_Start_IT(&htim2);
-}
-
+//void HAL_DAC_ConvCpltCallbackCh1(DAC_HandleTypeDef *hdac) {
+//	HAL_TIM_Base_Stop_IT(&htim2);
+//	HAL_DAC_Start_DMA(hdac, DAC_CHANNEL_1, (uint32_t*) sine[psine], 256,
+//	DAC_ALIGN_12B_L);
+//	HAL_DAC_Start_DMA(hdac, DAC_CHANNEL_2, (uint32_t*) sine[psine], 256,
+//	DAC_ALIGN_12B_L);
+//	HAL_TIM_Base_Start_IT(&htim2);
+//}
 /* USER CODE END 0 */
 
 /**
@@ -129,55 +129,47 @@ int main(void) {
 	MX_TIM2_Init();
 	MX_ADC1_Init();
 	/* USER CODE BEGIN 2 */
-
-	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_5, GPIO_PIN_SET);
+	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_5, GPIO_PIN_RESET);
 	DebugUI_INIT();
 
-	/*
-	 FATFS myFATAFS;
-	 bool mount = false;
-	 char myfile[] = "TEST0.wav";
+	//Music Player codeing
 
-	 mount = (f_mount(&myFATAFS, SDPath, 1) == 0);
-	 if (mount) {
-	 DebugUI_push("Finish Mount");
-	 } else {
-	 DebugUI_push("Failed Mount");
-	 };
-	 //
-	 wav_INIT(myfile);
-	 //
-	 if (mount) {
-	 mount = !(f_mount(NULL, SDPath, 1) == 0);
-	 if (!mount) {
-	 DebugUI_push("Finish Unmount");
-	 } else {
-	 DebugUI_push("Failed Unmount");
-	 }
-	 }
-	 */
+	FATFS myFATAFS;
+	bool mount = false;
+	char myfile[] = "A4_Tone.wav";
 
-	for (int i = 0; i < 256; i++) {
-		sine[i] = (uint16_t) 4095 * (sinf(2 * M_PI / 256 * i) + 1) / 2;
-	}
-	DebugUI_push("Generated sine");
+	mount = (f_mount(&myFATAFS, SDPath, 1) == 0);
+	if (mount) {
+		DebugUI_push("Finish Mount");
+	} else {
+		DebugUI_push("Failed Mount");
+	};
+	wavPlayer(myfile);
 
-	//Change timer setting for different tone
-	//the clock frequency == the frequency you want *256
-	//A4 (440Hz)--Prescaler 70 counter 8
-	//A3 (220Hz)--Prescaler 70 counter 17
-	HAL_TIM_Base_DeInit(&htim2);
-	htim2.Init.Prescaler = 70;
-	htim2.Init.Period = 8;
-	HAL_TIM_Base_Init(&htim2);
+//Test code
 
-	DebugUI_push("Playing 'A4' tone.");
-	HAL_TIM_Base_Start_IT(&htim2);
-	HAL_DAC_Start_DMA(&hdac, DAC_CHANNEL_1, (uint32_t*) sine, 256,
-	DAC_ALIGN_12B_R);
-	HAL_DAC_Start_DMA(&hdac, DAC_CHANNEL_2, (uint32_t*) sine, 256,
-	DAC_ALIGN_12B_R);
-	HAL_TIM_Base_Start_IT(&htim2);
+//	for (int i = 0; i < 256; i++) {
+//		sine[0][i] = 32768 * sinf(2 * M_PI / 256 * i);
+//		sine[0][i] += 32768;
+//		sine[1][i] = 32768 * sinf(4 * M_PI / 256 * i);
+//		sine[1][i] += 32768;
+//	}
+//
+//	DebugUI_push("Generated sine");
+//
+//	//Change timer setting for different tone
+//	//the clock frequency == the frequency you want *256
+//	//A4 (440Hz)--Prescaler 70 counter 8
+//	//A3 (220Hz)--Prescaler 70 counter 17
+//	TIM_reINIT(70, 8);
+//
+//	DebugUI_push("Playing 'A4' tone.");
+//	HAL_TIM_Base_Start_IT(&htim2);
+//
+//	HAL_DAC_Start_DMA(&hdac, DAC_CHANNEL_1, (uint32_t*) sine[psine], 256,
+//	DAC_ALIGN_12B_L);
+//	HAL_DAC_Start_DMA(&hdac, DAC_CHANNEL_2, (uint32_t*) sine[psine], 256,
+//	DAC_ALIGN_12B_L);
 
 	/* USER CODE END 2 */
 
@@ -185,6 +177,21 @@ int main(void) {
 	/* USER CODE BEGIN WHILE */
 
 	while (1) {
+//		HAL_Delay(1000);
+//		psine = (psine + 1) % 2;
+
+		int K1 = HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_0);
+		if (K1) {
+			closefile();
+			if (mount) {
+				mount = !(f_mount(NULL, SDPath, 1) == 0);
+				if (!mount) {
+					DebugUI_push("Finish Unmount");
+				} else {
+					DebugUI_push("Failed Unmount");
+				}
+			}
+		}
 
 		/* USER CODE END WHILE */
 
@@ -335,7 +342,7 @@ static void MX_SDIO_SD_Init(void) {
 	hsd.Init.ClockPowerSave = SDIO_CLOCK_POWER_SAVE_DISABLE;
 	hsd.Init.BusWide = SDIO_BUS_WIDE_1B;
 	hsd.Init.HardwareFlowControl = SDIO_HARDWARE_FLOW_CONTROL_DISABLE;
-	hsd.Init.ClockDiv = 4;
+	hsd.Init.ClockDiv = 2;
 	/* USER CODE BEGIN SDIO_Init 2 */
 
 	/* USER CODE END SDIO_Init 2 */

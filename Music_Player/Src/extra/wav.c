@@ -3,47 +3,40 @@
 #include "debugUI.h"
 #include "string.h"
 #include "main.h"
-#include "stm32f1xx_hal_tim.h"
+#include "math.h"
 
-static struct HEADER header;
 static FIL pfile;
 static UINT br;
+static struct HEADER header;
 static unsigned int WaveDataLength;
-static BYTE wavBuffer[2][512];
-static int pBuffer, pData, dataDone;
-extern DAC_HandleTypeDef hdac;
-extern DMA_HandleTypeDef hdma_dac_ch1;
-extern TIM_HandleTypeDef htim2;
+static unsigned short int data[2][512];
+static BYTE Buffer[512];
 
-void wav_INIT(char *fname) {
+static BYTE pdata = 0;
 
+void wavPlayer(char *fname) {
 	FRESULT res;
-	RESULT R;
-	pBuffer = 0;
-	pData = 0;
-	dataDone = 0;
-
 	res = f_open(&pfile, fname, FA_OPEN_EXISTING | FA_READ);
 	if (res == FR_OK) {
 		DebugUI_push("Opened");
 		//
+		getHeader();
+		printHeader();
+		checkHeader();
+		//
 
-		R = getHeader();
-		if (R == OK) {
-			R = checkHeader();
-			DebugUI_pushValue(R);
-		} else {
-			DebugUI_pushValue(R);
-		}
+		//init(although most is done by main
+		TIM_reINIT(36000000 / header.sample_rate - 1, 1);
+		//
+
+		//play
 		WaveDataLength = header.data_size;
+		getSample();
+		Start_DMA();
+		getSample();
 		//
 
 		//
-		res = f_close(&pfile);
-		if (res == FR_OK) {
-			DebugUI_push("Closed");
-		};
-
 	}
 }
 
@@ -66,88 +59,119 @@ RESULT getHeader(void) {
 	f_read(&pfile, &header.data_size, sizeof(header.data_size), &br);
 	//Some wav have extra information we don't need right now
 	//It can be on top or bottom...
-	while (strcmp(header.data_chunk_header, "data")) {
+	while (strncmp(header.data_chunk_header, "data", 4)) {
 		pfile.fptr += header.data_size;
 		f_read(&pfile, header.data_chunk_header,
 				sizeof(header.data_chunk_header), &br);
 		f_read(&pfile, &header.data_size, sizeof(header.data_size), &br);
-		if (f_eof(&pfile) == 0) {
+		if (f_eof(&pfile) == 1) {
 			return END_OF_FILE;
 		}
 	}
-	f_read(&pfile, wavBuffer[0], sizeof(wavBuffer[0]), &br);
 	return OK;
 }
 
 RESULT checkHeader(void) {
-	if (!(strcmp(header.riff, "RIFF") //check if the first four byte is equal to "RIFF"
-			|| strcmp(header.wave, "WAVE") //check if that four byte is equal to "WAVE"
-			|| strcmp(header.fmt_chunk_marker, "fmt ") //check if that four byte is equal to "fmt "(include the space)
-			|| (header.format_type | 0x1) //check if the format is PCM or not
-			|| ((header.channels | 0x1) || (header.channels | 0x10)) //check if channels is 1 or 2 (mono or stereo)
-			|| ((header.bits_per_sample | 0x1000)
-					|| (header.bits_per_sample | 0x100)) //check if bits per sample is 8 or 16
-	)) {
-		return OK;
-	} else {
-		return FORMAT_ERROR;
+	if (strncmp(header.riff, "RIFF", 4) == 0) { //check if the first four byte is equal to "RIFF"
+		if (strncmp(header.wave, "WAVE", 4) == 0) { //check if that four byte is equal to "WAVE"
+			if (strncmp(header.fmt_chunk_marker, "fmt ", 4) == 0) { //check if that four byte is equal to "fmt "(include the space)
+				if (header.format_type == 1) { //check if the format is PCM or not
+					if ((header.channels == 1) || (header.channels == 2)) { //check if channels is 1 or 2 (mono or stereo)
+						if ((header.bits_per_sample == 8)
+								|| (header.bits_per_sample == 16)) { //check if bits per sample is 8 or 16
+							return OK;
+						}
+					}
+				}
+			}
+		}
 	}
+	return FORMAT_ERROR;
 }
 
 void printHeader(void) {
-	DebugUI_push(header.riff);
-	DebugUI_pushValue(header.overall_size);
-	DebugUI_push(header.wave);
-	DebugUI_push(header.fmt_chunk_marker);
-	DebugUI_pushValue(header.length_of_fmt);
-	DebugUI_pushValue(header.format_type);
-	DebugUI_pushValue(header.channels);
+	//DebugUI_push(header.riff);
+	//DebugUI_pushValue(header.overall_size);
+	//DebugUI_push(header.wave);
+	//DebugUI_push(header.fmt_chunk_marker);
+	//DebugUI_pushValue(header.length_of_fmt);
+	if (header.format_type == 1) {
+		DebugUI_push("PCM");
+	} else {
+		DebugUI_push("Unsupported format");
+	};
+	if (header.channels == 1) {
+		DebugUI_push("Mono");
+	} else {
+		DebugUI_push("Stereo");
+	};
 	DebugUI_pushValue(header.sample_rate);
-	DebugUI_pushValue(header.byterate);
-	DebugUI_pushValue(header.block_align);
-	DebugUI_pushValue(header.bits_per_sample);
-	DebugUI_push(header.data_chunk_header);
-	DebugUI_pushValue(header.data_size);
+	//DebugUI_pushValue(header.byterate);
+	//DebugUI_pushValue(header.block_align);
+	if (header.bits_per_sample == 8) {
+		DebugUI_push("8-bits unsigned");
+	} else {
+		DebugUI_push("16-bits signed");
+	};
+	//DebugUI_push(header.data_chunk_header);
+	//DebugUI_pushValue(header.data_size);
 }
 
-void wav_play(void) {
-	while (WaveDataLength != 0) {
-		f_read(&pfile, wavBuffer[1], sizeof(wavBuffer[1]), &br);
-		while (!dataDone) {
-			dataDone = 0;
-			pBuffer = 1;
-		}
-		if (WaveDataLength < 512) {
-			WaveDataLength = 0;
-		} else {
-			WaveDataLength -= 512;
-		};
-		/*
-		 Disable DMA , Config DMA to transfer 512
-		 bytes from wavBuffer2 to DAC ch1 8bit
-		 DHR register, and enable DMA
-		 */
-		f_read(&pfile, wavBuffer[0], sizeof(wavBuffer[1]), &br);
-		while (!dataDone) {
-			dataDone = 0;
-			pBuffer = 0;
-		}
-		if (WaveDataLength < 512) {
-			WaveDataLength = 0;
-		} else {
-			WaveDataLength -= 512;
-		};
-		/*
-		 Disable DMA , Config DMA to transfer 512
-		 bytes from wavBuffer2 to DAC ch1 8bit
-		 DHR register, and enable DMA
-		 */
+void TIM_reINIT(uint16_t psc, uint16_t arr) {
+//	I don't know why,but both number has to be non-zero
+	DebugUI_pushValue(HAL_TIM_Base_DeInit(&htim2));
+	htim2.Init.Prescaler = (uint32_t) psc;
+	htim2.Init.Period = (uint32_t) arr;
+	DebugUI_pushValue(HAL_TIM_Base_Init(&htim2));
+}
+
+void getSample(void) {
+	/*Four case:
+	 *	8bit mono data(0-511)
+	 *	16 bit mono data(0-255)
+	 *	8bit stereo data(0-255)->Left	data(256-511)->Right
+	 *	16bit stereo data(0-127)->Left  data(128-255)->Right
+	 */
+	f_read(&pfile, Buffer, sizeof(Buffer), &br);
+	//16-bits mono
+	for (int i = 0; i < sizeof(Buffer) / 2; i++) {
+		data[pdata][i] = (Buffer[2 * i + 1] << 8 | Buffer[2 * i]) ^ 0x8000;
 	}
 }
 
-void TIM_reINIT(void) {
-	HAL_TIM_Base_DeInit(&htim2);
-	htim2.Init.Prescaler = 70;
-	htim2.Init.Period = 8;
-	HAL_TIM_Base_Init(&htim2);
+void Start_DMA(void) {
+	/*Four case:
+	 *	8bit mono data(0-511)
+	 *	16 bit mono data(0-255)
+	 *	8bit stereo data(0-255)->Left	data(256-511)->Right
+	 *	16bit stereo data(0-127)->Left  data(128-255)->Right
+	 */
+	HAL_DAC_Start_DMA(&hdac, DAC_CHANNEL_1, (uint32_t*) data[pdata], 256,
+	DAC_ALIGN_12B_L);
+	HAL_DAC_Start_DMA(&hdac, DAC_CHANNEL_2, (uint32_t*) data[pdata], 256,
+	DAC_ALIGN_12B_L);
+
+	HAL_TIM_Base_Start_IT(&htim2);
+	pdata = pdata ^ 0x01;
+}
+
+void HAL_DAC_ConvCpltCallbackCh1(DAC_HandleTypeDef *hdac) {
+	if (WaveDataLength > 0) {
+		HAL_TIM_Base_Stop_IT(&htim2);
+		if (WaveDataLength > 512) {
+			WaveDataLength -= 512;
+		} else {
+			WaveDataLength = 0;
+		}
+		Start_DMA();
+		getSample();
+	} else {
+		closefile();
+	}
+}
+
+void closefile(void) {
+	if (f_close(&pfile) == FR_OK) {
+		DebugUI_push("Closed");
+	};
 }

@@ -15,10 +15,11 @@ void DebugUI_INIT(void) {
 }
 
 void DebugUI_update(void) {
-	LCD_Clear(0, 0, 240, 320, BACKGROUND);
 	int index = start;
 	for (int i = 0; i < SIZE; i++) {
 		LCD_DrawString(12, 10 + HEIGHT * i, line[index]);
+		LCD_Clear(12 + WIDTH_EN_CHAR * strlen(line[index]), 10 + HEIGHT * i,
+				216, HEIGHT_EN_CHAR, WHITE);
 		index++;
 		index %= SIZE;
 	}
