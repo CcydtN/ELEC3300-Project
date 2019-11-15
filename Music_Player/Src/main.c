@@ -63,6 +63,7 @@ TIM_HandleTypeDef htim2;
 SRAM_HandleTypeDef hsram1;
 
 /* USER CODE BEGIN PV */
+static uint16_t sine[256];
 
 /* USER CODE END PV */
 
@@ -81,6 +82,15 @@ static void MX_ADC1_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+
+void HAL_DAC_ConvCpltCallbackCh1(DAC_HandleTypeDef *hdac) {
+	HAL_TIM_Base_Stop_IT(&htim2);
+	HAL_DAC_Start_DMA(hdac, DAC_CHANNEL_1, (uint32_t*) sine, 256,
+	DAC_ALIGN_12B_R);
+	HAL_DAC_Start_DMA(hdac, DAC_CHANNEL_2, (uint32_t*) sine, 256,
+	DAC_ALIGN_12B_R);
+	HAL_TIM_Base_Start_IT(&htim2);
+}
 
 /* USER CODE END 0 */
 
@@ -146,10 +156,11 @@ int main(void) {
 	 }
 	 }
 	 */
-	uint16_t sine[256];
+
 	for (int i = 0; i < 256; i++) {
 		sine[i] = (uint16_t) 4095 * (sinf(2 * M_PI / 256 * i) + 1) / 2;
 	}
+	DebugUI_push("Generated sine");
 
 	//Change timer setting for different tone
 	//the clock frequency == the frequency you want *256
@@ -159,39 +170,22 @@ int main(void) {
 	htim2.Init.Prescaler = 70;
 	htim2.Init.Period = 8;
 	HAL_TIM_Base_Init(&htim2);
+
 	DebugUI_push("Playing 'A4' tone.");
 	HAL_TIM_Base_Start_IT(&htim2);
 	HAL_DAC_Start_DMA(&hdac, DAC_CHANNEL_1, (uint32_t*) sine, 256,
 	DAC_ALIGN_12B_R);
 	HAL_DAC_Start_DMA(&hdac, DAC_CHANNEL_2, (uint32_t*) sine, 256,
 	DAC_ALIGN_12B_R);
+	HAL_TIM_Base_Start_IT(&htim2);
 
 	/* USER CODE END 2 */
 
 	/* Infinite loop */
-
 	/* USER CODE BEGIN WHILE */
-	int K1, LastK1 = 0;
 
 	while (1) {
-		K1 = HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_0);
-		if ((K1) && (K1 != LastK1)) {
-			HAL_TIM_Base_Stop(&htim2);
-			HAL_TIM_Base_DeInit(&htim2);
-			htim2.Init.Period = 17;
-			HAL_TIM_Base_Init(&htim2);
-			DebugUI_push("Playing 'A3' tone.");
-			HAL_TIM_Base_Start_IT(&htim2);
-		}
-		if ((!K1) && (K1 != LastK1)) {
-			HAL_TIM_Base_Stop(&htim2);
-			HAL_TIM_Base_DeInit(&htim2);
-			htim2.Init.Period = 8;
-			HAL_TIM_Base_Init(&htim2);
-			DebugUI_push("Playing 'A4' tone.");
-			HAL_TIM_Base_Start_IT(&htim2);
-		}
-		LastK1 = K1;
+
 		/* USER CODE END WHILE */
 
 		/* USER CODE BEGIN 3 */
