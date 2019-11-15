@@ -1,12 +1,21 @@
 #ifndef SRC_EXTRA_WAV_H_
 #define SRC_EXTRA_WAV_H_
 
+extern DAC_HandleTypeDef hdac;
+extern TIM_HandleTypeDef htim2;
+
+//Array size constant
+#define FullSize	512
+#define HalfSize	256
+#define	QuarSize	128
+
 typedef enum {
 	OK = 0, END_OF_FILE, FORMAT_ERROR
 } RESULT;
 
-extern DAC_HandleTypeDef hdac;
-extern TIM_HandleTypeDef htim2;
+enum format {
+	PCM_8_mono = 0, PCM_8_stereo, PCM_16_mono, PCM_16_stereo
+};
 
 // WAVE file header format
 struct HEADER {
