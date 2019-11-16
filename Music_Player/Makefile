@@ -64,12 +64,13 @@ Middlewares/Third_Party/FatFs/src/ff_gen_drv.c \
 Middlewares/Third_Party/FatFs/src/option/syscall.c \
 Middlewares/Third_Party/FatFs/src/option/cc950.c \
 Middlewares/Third_Party/FatFs/src/drivers/sd_diskio.c \
-Src/extra/lcd.c	\ \
 Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_dac.c \
 Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_dac_ex.c \
 Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_adc.c \
-Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_adc_ex.c
-
+Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_adc_ex.c \
+Src/DebugPrint/Trace.c \
+Src/DebugPrint/trace_impl.c \
+Src/LCD/lcd.c \
 
 # ASM sources
 ASM_SOURCES =  \
@@ -118,7 +119,10 @@ AS_DEFS =
 # C defines
 C_DEFS =  \
 -DUSE_HAL_DRIVER \
--DSTM32F103xE
+-DSTM32F103xE \
+-DTRACE \
+-DOS_USE_TRACE_SEMIHOSTING_STDOUT \
+-DOS_HAS_NO_CORE_DEBUG \
 
 
 # AS includes
@@ -133,7 +137,10 @@ C_INCLUDES =  \
 -IMiddlewares/Third_Party/FatFs/src/drivers \
 -IDrivers/CMSIS/Device/ST/STM32F1xx/Include \
 -IDrivers/CMSIS/Include \
--ISrc/extra
+-ISrc/extra \
+-ISrc/DebugPrint \
+-ISrc/Player \
+-ISrc/LCD \
 
 
 # compile gcc flags
@@ -160,7 +167,7 @@ LDSCRIPT = STM32F103VETx_FLASH.ld
 LIBS = -lc -lm -lnosys 
 LIBDIR = 
 LDFLAGS = $(MCU) -specs=nano.specs -T$(LDSCRIPT) $(LIBDIR) $(LIBS) -Wl,-Map=$(BUILD_DIR)/$(TARGET).map,--cref -Wl,--gc-sections
-
+LDFLAGS += --specs=rdimon.specs
 # default action: build all
 all: $(BUILD_DIR)/$(TARGET).elf $(BUILD_DIR)/$(TARGET).hex $(BUILD_DIR)/$(TARGET).bin
 

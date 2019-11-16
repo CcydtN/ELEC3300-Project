@@ -5,23 +5,29 @@
 
 static char line[SIZE][LENGTH];
 static int start, end;
+static OnOff trigger;
 
-void DebugUI_INIT(void) {
-	LCD_INIT();
+void DebugUI_INIT(OnOff input) {
+	trigger = input;
 	start = 0;
 	end = SIZE - 1;
+	if (trigger) {
+		LCD_INIT();
+	}
 	char init[] = "*******debugUI Start********";
 	DebugUI_push(init);
 }
 
 void DebugUI_update(void) {
-	int index = start;
-	for (int i = 0; i < SIZE; i++) {
-		LCD_DrawString(12, 10 + HEIGHT * i, line[index]);
-		LCD_Clear(12 + WIDTH_EN_CHAR * strlen(line[index]), 10 + HEIGHT * i,
-				216, HEIGHT_EN_CHAR, WHITE);
-		index++;
-		index %= SIZE;
+	if (trigger) {
+		int index = start;
+		for (int i = 0; i < SIZE; i++) {
+			LCD_DrawString(12, 10 + HEIGHT * i, line[index]);
+			LCD_Clear(12 + WIDTH_EN_CHAR * strlen(line[index]), 10 + HEIGHT * i,
+					216, HEIGHT_EN_CHAR, WHITE);
+			index++;
+			index %= SIZE;
+		}
 	}
 }
 

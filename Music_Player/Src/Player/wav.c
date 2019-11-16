@@ -1,8 +1,8 @@
+#include "main.h"
 #include <wav.h>
 #include "fatfs.h"
-#include "debugUI.h"
 #include "string.h"
-#include "main.h"
+#include "Trace.h"
 
 static FIL pfile;
 static UINT br;
@@ -18,12 +18,12 @@ void wavPlayer(char *fname) {
 	FRESULT res;
 	res = f_open(&pfile, fname, FA_OPEN_EXISTING | FA_READ);
 	if (res == FR_OK) {
-		DebugUI_push("Opened");
+		trace_printf("Opened\n");
 		//
 		getHeader();
 		printHeader();
 		if (checkHeader() == OK) {
-			DebugUI_pushValue(Format);
+			trace_printf("%d\n", Format);
 
 			//init(although most is done by main
 			TIM_reINIT(36000000 / header.sample_rate - 1, 1);
@@ -86,7 +86,7 @@ RESULT checkHeader(void) {
 	}
 	//check if the format is PCM or not
 	if (header.format_type != 1) {
-		DebugUI_push("Not PCM");
+		trace_printf("Not PCM\n");
 		return FORMAT_ERROR;
 	}
 	//check the bits_per_sample is 8 or 16 or more
@@ -98,15 +98,13 @@ RESULT checkHeader(void) {
 		Format += 2;
 		break;
 	default:
-		DebugUI_push("bit/sample:");
-		DebugUI_pushValue(header.bits_per_sample);
+		trace_printf("bit/sample: %d\n", header.bits_per_sample);
 		return FORMAT_ERROR;
 	}
 	if ((header.channels == 1) || (header.channels == 2)) { //check if channels is 1 or 2 (mono or stereo)
 		Format += header.channels - 1;
 	} else {
-		DebugUI_push("Channel:");
-		DebugUI_pushValue(header.channels);
+		trace_printf("Channel: %d\n", header.channels);
 		return FORMAT_ERROR;
 	}
 	return OK;
@@ -119,22 +117,22 @@ void printHeader(void) {
 //DebugUI_push(header.fmt_chunk_marker);
 //DebugUI_pushValue(header.length_of_fmt);
 	if (header.format_type == 1) {
-		DebugUI_push("PCM");
+		trace_printf("PCM\n");
 	} else {
-		DebugUI_push("Unsupported format");
+		trace_printf("Unsupported format\n");
 	};
 	if (header.channels == 1) {
-		DebugUI_push("Mono");
+		trace_printf("Mono\n");
 	} else {
-		DebugUI_push("Stereo");
+		trace_printf("Stereo\n");
 	};
-	DebugUI_pushValue(header.sample_rate);
+	trace_printf("%d\n", header.sample_rate);
 //DebugUI_pushValue(header.byterate);
 //DebugUI_pushValue(header.block_align);
 	if (header.bits_per_sample == 8) {
-		DebugUI_push("8-bits unsigned");
+		trace_printf("8-bits unsigned\n");
 	} else {
-		DebugUI_push("16-bits signed");
+		trace_printf("16-bits signed\n");
 	};
 //DebugUI_push(header.data_chunk_header);
 //DebugUI_pushValue(header.data_size);
@@ -152,7 +150,7 @@ void getSample(void) {
 	/*	8-bit mono:		data(0-511)
 	 *  8-bit stereo:	data(0-255)(LEFT)	data(256-511)(RIGHT)
 	 *  16-bit mono:	data(0-255)
-	 *  16-bit stereo:	data(0-127)(LEFT)	data(128-255)(RIGHT)
+	 *  16-bit stereo:	data(0-127)(LEFT)	data(256-383)(RIGHT)
 	 */
 	f_read(&pfile, Buffer, FullSize, &br);
 	switch (Format) {
@@ -174,10 +172,10 @@ void getSample(void) {
 		}
 		break;
 	case PCM_16_stereo:
-		for (int i = 0; i < QuarSize; i += 4) {
+		for (int i = 0; i < QuarSize; i++) {
 			data[pdata][i] =
 					((Buffer[4 * i + 1] << 8 | Buffer[4 * i]) ^ 0x8000);
-			data[pdata][i + QuarSize] = ((Buffer[4 * i + 3] << 8
+			data[pdata][i + HalfSize] = ((Buffer[4 * i + 3] << 8
 					| Buffer[4 * i + 2]) ^ 0x8000);
 		}
 		break;
@@ -222,7 +220,7 @@ void Start_DMA(void) {
 		QuarSize,
 		DAC_ALIGN_12B_L);
 		HAL_DAC_Start_DMA(&hdac, DAC_CHANNEL_2,
-				(uint32_t*) &data[pdata][QuarSize], QuarSize,
+				(uint32_t*) &data[pdata][HalfSize], QuarSize,
 				DAC_ALIGN_12B_L);
 		break;
 	}
@@ -250,6 +248,6 @@ void closefile(void) {
 	HAL_DAC_Stop_DMA(&hdac, DAC_CHANNEL_2);
 	HAL_TIM_Base_Stop_IT(&htim2);
 	if (f_close(&pfile) == FR_OK) {
-		DebugUI_push("Closed");
+		trace_printf("File Closed\n");
 	};
 }

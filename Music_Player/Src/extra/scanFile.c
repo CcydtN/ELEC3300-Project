@@ -1,6 +1,7 @@
 #include "ffconf.h"
 #include "string.h"
 #include "scanFile.h"
+#include "Trace.h"
 
 static FRESULT scan_files(char *path /* Pointer to the working buffer with start path */
 ) {
@@ -11,8 +12,8 @@ static FRESULT scan_files(char *path /* Pointer to the working buffer with start
 	FILINFO Finfo;
 	res = f_opendir(&dirs, path);
 	if (res == FR_OK) {
-		DebugUI_push("Opened Dir");
-		DebugUI_push(path);
+		trace_printf("Opened Dir");
+		trace_printf("%s", path);
 		i = strlen(path);
 		while (((res = f_readdir(&dirs, &Finfo)) == FR_OK) && Finfo.fname[0]) {
 
@@ -31,11 +32,7 @@ static FRESULT scan_files(char *path /* Pointer to the working buffer with start
 				if (res != FR_OK)
 					break;
 			} else {
-				//char *temp;
-				//sprintf(temp, "%s%s", path, fn);
-				DebugUI_push("");
-				DebugUI_push(path);
-				DebugUI_push(fn);
+				trace_printf("%s%s", path, fn);
 			}
 		}
 	}
