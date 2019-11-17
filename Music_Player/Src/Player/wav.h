@@ -7,40 +7,94 @@ extern TIM_HandleTypeDef htim2;
 //Array size constant
 #define FullSize	512
 #define HalfSize	256
-#define	QuarSize	128
+#define QuarSize	128
 
-typedef enum {
-	OK = 0, END_OF_FILE, FORMAT_ERROR
-} RESULT;
-
-enum format {
+enum short_fmt {
 	PCM_8_mono = 0, PCM_8_stereo, PCM_16_mono, PCM_16_stereo
 };
-
 // WAVE file header format
-struct HEADER {
-	char riff[4];						// RIFF string
-	unsigned int overall_size;				// overall size of file in bytes
-	char wave[4];						// WAVE string
-	char fmt_chunk_marker[4];	// fmt string with trailing null char
-	unsigned int length_of_fmt;					// length of the format data
-	uint16_t format_type;// format type. 1-PCM, 3- IEEE float, 6 - 8bit A law, 7 - 8bit mu law
-	uint16_t channels;						// no.of channels
-	unsigned int sample_rate;				// sampling rate (blocks per second)
-	unsigned int byterate;		// SampleRate * NumChannels * BitsPerSample/8
-	uint16_t block_align;					// NumChannels * BitsPerSample/8
-	uint16_t bits_per_sample;	// bits per sample, 8- 8bits, 16- 16 bits etc
-	char data_chunk_header[4];		// DATA string or FLLR string
-	unsigned int data_size;	// NumSamples * NumChannels * BitsPerSample/8 - size of the next chunk that will be read
+struct FORMAT {
+	//"fmt "(with a space)
+	char label[4];
+	//size of chunk
+	unsigned int size;
+	// format type. 1-PCM, 3- IEEE float, 6 - 8bit A law, 7 - 8bit mu law
+	uint16_t type;
+	// no.of channels
+	uint16_t channels;
+	// sampling rate (blocks per second)
+	unsigned int sample_rate;
+	// SampleRate * NumChannels * BitsPerSample/8
+	unsigned int byterate;
+	// NumChannels * BitsPerSample/8
+	uint16_t block_align;
+	// bits per sample, 8- 8bits, 16- 16 bits etc
+	uint16_t bits_per_sample;
 };
 
+struct DATA {
+	//"data"
+	char label[4];
+	//total size of data = NumSamples* NumChannels*BitPerSample/8
+	unsigned int size;
+	//Start pointer, for data reading in later
+	DWORD pStart;
+};
+
+struct LIST {
+	//"LIST"
+	char label[4];
+	//size of chunk
+	unsigned int size;
+};
+
+struct HEADER {
+	//"RIFF"
+	char riff[4];
+	// overall size of file in bytes
+	unsigned int overall_size;
+	//"WAVE"
+	char wave[4];
+	//format chunk
+	struct FORMAT format;
+	// True after format is read
+	bool fmt_done;
+	//data chunk
+	struct DATA data;
+	// True after data is read
+	bool data_done;
+	//List chunk
+	struct LIST list;
+	//True after data is read
+	bool list_done;
+
+};
+//End of Header
+
 void wavPlayer(char *fname);
-RESULT getHeader(void);
-RESULT checkHeader(void);
+
+void pullHeader(void);
+
+void pullFormatChunk(void);
+
+void pullDataChunk(void);
+
+void pullListChunk(void);
+
+bool checkHeader(void);
+
+void printSimpifyFormat(void);
+
 void printHeader(void);
+
 void TIM_reINIT(uint16_t psc, uint16_t arr);
-void getSample(void);
+
+void pullData(void);
+
+void rearrData(void);
+
 void Start_DMA(void);
+
 void closefile(void);
 
 #endif /* SRC_EXTRA_WAV_H_ */
