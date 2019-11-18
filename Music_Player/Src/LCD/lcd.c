@@ -388,8 +388,8 @@ void LCD_DrawBox(uint16_t usC, uint16_t usP, uint16_t width, uint16_t height,
 	LCD_Write_Cmd( CMD_SetPixel);
 	for (int i = 0; i < height; i++) {
 		for (int j = 0; j < width; j++) {
-			if (i == 0 || i == height - 1 || i == 1 || i == height - 2 || j == 0
-					|| j == width - 1 || j == 1 || j == width - 2) {
+			if (i == 0 || i == height - 1 || j == 0
+					|| j == width - 1) {
 				LCD_Write_Data(borderColor);
 			} else {
 				LCD_Write_Data(insideColor);
