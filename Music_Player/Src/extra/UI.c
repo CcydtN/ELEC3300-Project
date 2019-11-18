@@ -27,5 +27,6 @@ void UI_INIT(void) {
 	LCD_DrawLine(220, 262, 220, 273, BLACK);
 	LCD_DrawLine(20, 267, 220, 267, BLACK);
 	LCD_DrawLine(20, 268, 220, 268, BLACK);
+	LCD_DrawString(8, 8, "Fuck You");
 	trace_printf("WTF\n");
 }
