@@ -1,9 +1,13 @@
-#include "main.h"
 #include "wav.h"
 #include "fatfs.h"
 #include "string.h"
 #include "stdbool.h"
 #include "Trace.h"
+
+extern DAC_HandleTypeDef hdac;
+extern TIM_HandleTypeDef htim2;
+extern DMA_HandleTypeDef hdma_dac_ch1;
+extern DMA_HandleTypeDef hdma_dac_ch2;
 
 FIL pfile;
 UINT br;
@@ -209,9 +213,31 @@ void TIM_reINIT(uint16_t psc, uint16_t arr) {
 	HAL_TIM_Base_Init(&htim2);
 }
 
+//void DMA_reINIT(void) {
+//	HAL_DAC_MspDeInit(&hdac);
+//	hdma_dac_ch1.Init.PeriphDataAlignment = DMA_PDATAALIGN_BYTE;
+//	hdma_dac_ch2.Init.PeriphDataAlignment = DMA_PDATAALIGN_BYTE;
+//	hdma_dac_ch1.Init.MemDataAlignment = DMA_MDATAALIGN_BYTE;
+//	hdma_dac_ch2.Init.MemDataAlignment = DMA_MDATAALIGN_BYTE;
+//
+//	HAL_DMA_Init(&hdma_dac_ch1);
+//	HAL_DMA_Init(&hdma_dac_ch2);
+//}
+
 void pullData(void) {
-	f_read(&pfile, Buffer[pdata], FullSize, &br);
+	if (s_fmt < 2) {
+		f_read(&pfile, Buffer[pdata], HalfSize, &br);
+	} else {
+		f_read(&pfile, Buffer[pdata], FullSize, &br);
+	}
+//	for (int i = 0; i < 10; i++) {
+//		trace_printf("%x\t", Buffer[pdata][i]);
+//	}
+//	trace_printf("\n");
 	rearrData();
+//	for (int i = 0; i < 10; i++) {
+//		trace_printf("%x\t", Buffer[pdata][i]);
+//	}
 }
 
 void rearrData(void) {
@@ -223,14 +249,19 @@ void rearrData(void) {
 	 * LLLLL....RRRRR....
 	 */
 	uint8_t temp[FullSize];
+	memset(temp, 0, sizeof(temp));
+
 	switch (s_fmt) {
 	case PCM_8_mono:
-		//do nothing
+		for (int i = 0; i < HalfSize; i++) {
+			temp[2 * i] = Buffer[pdata][i];
+		}
+		memcpy(Buffer[pdata], temp, FullSize);
 		break;
 	case PCM_8_stereo:
-		for (int i = 0; i < HalfSize; i++) {
-			temp[i] = Buffer[pdata][2 * i];
-			temp[i + HalfSize] = Buffer[pdata][2 * i + 1];
+		for (int i = 0; i < QuarSize; i++) {
+			temp[2 * i] = Buffer[pdata][2 * i];
+			temp[2 * i + HalfSize] = Buffer[pdata][2 * i + 1];
 		}
 		memcpy(Buffer[pdata], temp, FullSize);
 		break;
@@ -250,6 +281,7 @@ void rearrData(void) {
 		break;
 	}
 }
+
 void Start_DMA(void) {
 	/*	8-bit mono:		data(0-511)
 	 *  8-bit stereo:	data(0-255)(LEFT)	data(256-511)(RIGHT)
@@ -259,19 +291,19 @@ void Start_DMA(void) {
 	switch (s_fmt) {
 	case PCM_8_mono:
 		HAL_DAC_Start_DMA(&hdac, DAC_CHANNEL_1, (uint32_t*) Buffer[pdata],
-		FullSize,
+		HalfSize,
 		DAC_ALIGN_8B_R);
 		HAL_DAC_Start_DMA(&hdac, DAC_CHANNEL_2, (uint32_t*) Buffer[pdata],
-		FullSize,
+		HalfSize,
 		DAC_ALIGN_8B_R);
 		break;
 	case PCM_8_stereo:
 		HAL_DAC_Start_DMA(&hdac, DAC_CHANNEL_1, (uint32_t*) Buffer[pdata],
-		HalfSize,
+		QuarSize,
 		DAC_ALIGN_8B_R);
 		HAL_DAC_Start_DMA(&hdac, DAC_CHANNEL_2,
 				(uint32_t*) &Buffer[pdata][HalfSize],
-				HalfSize,
+				QuarSize,
 				DAC_ALIGN_8B_R);
 		break;
 	case PCM_16_mono:

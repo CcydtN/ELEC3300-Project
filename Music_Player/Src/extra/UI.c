@@ -1,7 +1,11 @@
+#include <DIR.h>
 #include "UI.h"
 #include "lcd.h"
 #include "string.h"
 #include "Trace.h"
+
+extern char path[512];
+extern char currentList[20][_MAX_LFN];
 
 void UI_INIT(void) {
 	LCD_INIT();
@@ -28,5 +32,5 @@ void UI_INIT(void) {
 	LCD_DrawLine(20, 267, 220, 267, BLACK);
 	LCD_DrawLine(20, 268, 220, 268, BLACK);
 	LCD_DrawString(8, 8, "Fuck You");
-	trace_printf("WTF\n");
+//	trace_printf("WTF\n");
 }

@@ -31,9 +31,9 @@
 
 #include "stdbool.h"
 #include "wav.c"
-#include "scanFile.c"
 #include "UI.c"
 #include "lcd.h"
+#include "DIR.h"
 
 /* USER CODE END Includes */
 
@@ -67,8 +67,8 @@ TIM_HandleTypeDef htim2;
 SRAM_HandleTypeDef hsram1;
 
 /* USER CODE BEGIN PV */
-extern char path[512];
-extern char currentList[20][255];
+char path[512];
+char currentList[20][_MAX_LFN];
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -95,6 +95,7 @@ static void MX_ADC1_Init(void);
  */
 int main(void) {
 	/* USER CODE BEGIN 1 */
+
 	/* USER CODE END 1 */
 
 	/* MCU Configuration--------------------------------------------------------*/
@@ -130,9 +131,11 @@ int main(void) {
 
 	FATFS myFATAFS;
 	int mount = 1;
-	char myfile[] = "16_Stereo.wav";
+	char myfile[] = "8_Mono.wav";
 	/*
 	 * Wav:
+	 * 8_Mono
+	 * 8_Stereo
 	 * 16_Mono
 	 * 16_Stereo
 	 * TEST
@@ -149,12 +152,7 @@ int main(void) {
 		trace_printf("Failed Mount\n");
 	};
 
-	//wavPlayer(myfile);
-	list_INIT();
-	trace_printf("%s\n", path);
-	for (int i = 0; i < 20; i++) {
-		trace_printf("%s\n", currentList);
-	}
+	wavPlayer(myfile);
 
 	/* USER CODE END 2 */
 
@@ -406,15 +404,18 @@ static void MX_GPIO_Init(void) {
 	/* GPIO Ports Clock Enable */
 	__HAL_RCC_GPIOC_CLK_ENABLE();
 	__HAL_RCC_GPIOA_CLK_ENABLE();
-	__HAL_RCC_GPIOB_CLK_ENABLE();
 	__HAL_RCC_GPIOE_CLK_ENABLE();
 	__HAL_RCC_GPIOD_CLK_ENABLE();
-
-	/*Configure GPIO pin Output Level */
-	HAL_GPIO_WritePin(GPIOB, LCD_RST_Pin | Test_LED_Pin, GPIO_PIN_RESET);
+	__HAL_RCC_GPIOB_CLK_ENABLE();
 
 	/*Configure GPIO pin Output Level */
 	HAL_GPIO_WritePin(LCD_BL_GPIO_Port, LCD_BL_Pin, GPIO_PIN_RESET);
+
+	/*Configure GPIO pin Output Level */
+	HAL_GPIO_WritePin(Test_LED_GPIO_Port, Test_LED_Pin, GPIO_PIN_RESET);
+
+	/*Configure GPIO pin Output Level */
+	HAL_GPIO_WritePin(LCD_RST_GPIO_Port, LCD_RST_Pin, GPIO_PIN_RESET);
 
 	/*Configure GPIO pin : K1_Pin */
 	GPIO_InitStruct.Pin = K1_Pin;
@@ -422,19 +423,26 @@ static void MX_GPIO_Init(void) {
 	GPIO_InitStruct.Pull = GPIO_NOPULL;
 	HAL_GPIO_Init(K1_GPIO_Port, &GPIO_InitStruct);
 
-	/*Configure GPIO pins : LCD_RST_Pin Test_LED_Pin */
-	GPIO_InitStruct.Pin = LCD_RST_Pin | Test_LED_Pin;
-	GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-	GPIO_InitStruct.Pull = GPIO_NOPULL;
-	GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
-	HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
-
 	/*Configure GPIO pin : LCD_BL_Pin */
 	GPIO_InitStruct.Pin = LCD_BL_Pin;
 	GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
 	GPIO_InitStruct.Pull = GPIO_NOPULL;
 	GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
 	HAL_GPIO_Init(LCD_BL_GPIO_Port, &GPIO_InitStruct);
+
+	/*Configure GPIO pin : Test_LED_Pin */
+	GPIO_InitStruct.Pin = Test_LED_Pin;
+	GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+	GPIO_InitStruct.Pull = GPIO_NOPULL;
+	GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
+	HAL_GPIO_Init(Test_LED_GPIO_Port, &GPIO_InitStruct);
+
+	/*Configure GPIO pin : LCD_RST_Pin */
+	GPIO_InitStruct.Pin = LCD_RST_Pin;
+	GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+	GPIO_InitStruct.Pull = GPIO_NOPULL;
+	GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
+	HAL_GPIO_Init(LCD_RST_GPIO_Port, &GPIO_InitStruct);
 
 }
 

@@ -1,8 +1,5 @@
-#ifndef SRC_EXTRA_WAV_H_
-#define SRC_EXTRA_WAV_H_
-
-extern DAC_HandleTypeDef hdac;
-extern TIM_HandleTypeDef htim2;
+#ifndef _WAV_H_
+#define _WAV_H_
 
 //Array size constant
 #define FullSize	512
@@ -88,6 +85,8 @@ void printSimpifyFormat(void);
 void printHeader(void);
 
 void TIM_reINIT(uint16_t psc, uint16_t arr);
+
+void DMA_reINIT(void);
 
 void pullData(void);
 
