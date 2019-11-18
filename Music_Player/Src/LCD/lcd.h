@@ -69,5 +69,6 @@ void LCD_DrawDot(uint16_t usC, uint16_t usP, uint16_t usColor);
 void LCD_DrawCircle(uint16_t usC, uint16_t usP, uint16_t R, uint16_t usColor);
 void LCD_DrawBox(uint16_t usC, uint16_t usP, uint16_t width, uint16_t height,
 		uint16_t borderColor, uint16_t insideColor);
+
 #endif
 

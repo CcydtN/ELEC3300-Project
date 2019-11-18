@@ -375,11 +375,14 @@ void LCD_DrawString(uint16_t usC, uint16_t usP, const char *pStr) {
 void LCD_DrawDot(uint16_t usCOLUMN, uint16_t usPAGE, uint16_t usColor) {
 	LCD_OpenWindow(usCOLUMN, usPAGE, 1, 1);
 	LCD_FillColor(1, usColor);
+
 }
 
 void LCD_DrawCircle(uint16_t usC, uint16_t usP, uint16_t R, uint16_t usColor) {
+
 	for (double t = 0; t < 2 * 3.14; t += 0.01)
 		LCD_DrawDot(usC + R * cos(t), usP + R * sin(t), usColor);
+
 }
 
 void LCD_DrawBox(uint16_t usC, uint16_t usP, uint16_t width, uint16_t height,
@@ -388,8 +391,7 @@ void LCD_DrawBox(uint16_t usC, uint16_t usP, uint16_t width, uint16_t height,
 	LCD_Write_Cmd( CMD_SetPixel);
 	for (int i = 0; i < height; i++) {
 		for (int j = 0; j < width; j++) {
-			if (i == 0 || i == height - 1 || j == 0
-					|| j == width - 1) {
+			if (i == 0 || i == height - 1 || j == 0 || j == width - 1) {
 				LCD_Write_Data(borderColor);
 			} else {
 				LCD_Write_Data(insideColor);
@@ -397,4 +399,3 @@ void LCD_DrawBox(uint16_t usC, uint16_t usP, uint16_t width, uint16_t height,
 		}
 	}
 }
-

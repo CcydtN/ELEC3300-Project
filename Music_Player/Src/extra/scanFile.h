@@ -3,4 +3,8 @@
 
 static FRESULT scan_files(char *path);
 
+void list_INIT();
+
+void getList(void);
+
 #endif
