@@ -348,6 +348,33 @@ void LCD_DrawChar(uint16_t usC, uint16_t usP, const char cChar) {
 
 }
 
+void LCD_DrawChar_Reversed(uint16_t usC, uint16_t usP, const char cChar) {
+	uint8_t ucTemp, ucRelativePositon, ucPage, ucColumn;
+
+	ucRelativePositon = cChar - ' ';
+
+	LCD_OpenWindow(usC, usP, WIDTH_EN_CHAR, HEIGHT_EN_CHAR);
+
+	LCD_Write_Cmd( CMD_SetPixel);
+
+	for (ucPage = 0; ucPage < HEIGHT_EN_CHAR; ucPage++) {
+		ucTemp = ucAscii_1608[ucRelativePositon][ucPage];
+
+		for (ucColumn = 0; ucColumn < WIDTH_EN_CHAR; ucColumn++) {
+			if (ucTemp & 0x01)
+				LCD_Write_Data(WHITE);
+
+			else
+				LCD_Write_Data(0x0000);
+
+			ucTemp >>= 1;
+
+		}
+
+	}
+
+}
+
 void LCD_DrawString(uint16_t usC, uint16_t usP, const char *pStr) {
 	while (*pStr != '\0') {
 		if ((usC - LCD_DispWindow_Start_COLUMN + WIDTH_EN_CHAR)
@@ -363,6 +390,30 @@ void LCD_DrawString(uint16_t usC, uint16_t usP, const char *pStr) {
 		}
 
 		LCD_DrawChar(usC, usP, *pStr);
+
+		pStr++;
+
+		usC += WIDTH_EN_CHAR;
+
+	}
+
+}
+
+void LCD_DrawString_Reversed(uint16_t usC, uint16_t usP, const char *pStr) {
+	while (*pStr != '\0') {
+		if ((usC - LCD_DispWindow_Start_COLUMN + WIDTH_EN_CHAR)
+				> LCD_DispWindow_COLUMN) {
+			usC = LCD_DispWindow_Start_COLUMN;
+			usP += HEIGHT_EN_CHAR;
+		}
+
+		if ((usP - LCD_DispWindow_Start_PAGE + HEIGHT_EN_CHAR)
+				> LCD_DispWindow_PAGE) {
+			usC = LCD_DispWindow_Start_COLUMN;
+			usP = LCD_DispWindow_Start_PAGE;
+		}
+
+		LCD_DrawChar_Reversed(usC, usP, *pStr);
 
 		pStr++;
 

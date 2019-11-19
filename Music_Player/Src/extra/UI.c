@@ -14,6 +14,12 @@ void UI_INIT(void) {
 	pageStart = 0;
 	pageEnd = 13;
 	for (int i = pageStart; i <= pageEnd; ++i) {
+		if(i == cursor){
+			LCD_OpenWindow(0, 8 + 18*i, 240, 16)
+			LCD_FillCOlor(240*16, BLACK);
+			LCD_DrawString_Reversed(8, 8 + i * 18, currentList[i]);
+	}
+	else
 		LCD_DrawString(8, 8 + i * 18, currentList[i]);
 	}
 	LCD_DrawLine(19, 262, 19, 273, BLACK);
