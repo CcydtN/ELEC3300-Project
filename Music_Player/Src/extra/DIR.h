@@ -1,7 +1,7 @@
 #ifndef _DIR_H_
 #define _DIR_H_
 
-void dir_INIT();
+void dir_INIT(void);
 
 void getDirList(void);
 

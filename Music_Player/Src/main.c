@@ -125,7 +125,6 @@ int main(void) {
 	MX_ADC1_Init();
 	/* USER CODE BEGIN 2 */
 	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_5, GPIO_PIN_SET);
-	UI_INIT();
 
 	//Music Player codeing
 
@@ -148,11 +147,15 @@ int main(void) {
 	mount = (f_mount(&myFATAFS, SDPath, 1) == FR_OK);
 	if (mount == 1) {
 		trace_printf("Finish Mount\n");
+
+		dir_INIT();
+		UI_INIT();
+
+		wavPlayer(myfile);
+
 	} else {
 		trace_printf("Failed Mount\n");
 	};
-
-	wavPlayer(myfile);
 
 	/* USER CODE END 2 */
 
