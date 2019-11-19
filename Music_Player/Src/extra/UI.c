@@ -13,8 +13,9 @@ void UI_INIT(void) {
 	cursor = 0;
 	pageStart = 0;
 	pageEnd = 13;
-
-
+	for (int i = pageStart; i <= pageEnd; ++i) {
+		LCD_DrawString(8, 8 + i * 18, currentList[i]);
+	}
 	LCD_DrawLine(19, 262, 19, 273, BLACK);
 	LCD_DrawLine(221, 262, 221, 273, BLACK);
 	LCD_DrawLine(20, 267, 220, 267, BLACK);
