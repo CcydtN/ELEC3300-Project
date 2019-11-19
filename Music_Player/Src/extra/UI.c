@@ -7,12 +7,15 @@
 extern char path[512];
 extern char currentList[20][_MAX_LFN];
 unsigned int cursor, pageStart, pageEnd;
+int count;
 
 void UI_INIT(void) {
 	LCD_INIT();
+	strcpy(path, "/");
+	count = getDirList();
 	cursor = 0;
 	pageStart = 0;
-	pageEnd = 13;
+	pageEnd = (count < 13) ? count : 13;
 	for (int i = pageStart; i <= pageEnd; ++i) {
 		LCD_DrawString(8, 8 + i * 18, currentList[i]);
 	}
@@ -82,7 +85,7 @@ void cursorUP(void) {
 void cursorDown(void) {
 	if (cursor != 20) {
 		cursor++;
-		if ((2 * cursor > pageStart + pageEnd) && (pageEnd != 20)) {
+		if ((2 * cursor > pageStart + pageEnd) && (pageEnd != count)) {
 			pageStart--;
 			pageEnd--;
 		}

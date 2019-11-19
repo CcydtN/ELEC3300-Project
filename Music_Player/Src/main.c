@@ -147,8 +147,6 @@ int main(void) {
 	mount = (f_mount(&myFATAFS, SDPath, 1) == FR_OK);
 	if (mount == 1) {
 		trace_printf("Finish Mount\n");
-
-		dir_INIT();
 		UI_INIT();
 
 		wavPlayer(myfile);
@@ -165,17 +163,22 @@ int main(void) {
 	while (1) {
 
 		int K1 = HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_0);
+		int K2 = HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_13)
 		if (K1) {
-			closefile();
-			if (mount == 1) {
-				mount = !(f_mount(NULL, SDPath, 1) == 0);
-				if (mount == 0) {
-					trace_printf("Finish Unmount\n");
-				} else {
-					trace_printf("Failed Unmount\n");
-				}
-			}
+			cursorUP();
 		}
+		if (K2) {
+			cursorDown();
+		}
+//		closefile();
+//		if (mount == 1) {
+//			mount = !(f_mount(NULL, SDPath, 1) == 0);
+//			if (mount == 0) {
+//				trace_printf("Finish Unmount\n");
+//			} else {
+//				trace_printf("Failed Unmount\n");
+//			}
+//		}
 
 		/* USER CODE END WHILE */
 
@@ -419,6 +422,12 @@ static void MX_GPIO_Init(void) {
 
 	/*Configure GPIO pin Output Level */
 	HAL_GPIO_WritePin(LCD_RST_GPIO_Port, LCD_RST_Pin, GPIO_PIN_RESET);
+
+	/*Configure GPIO pin : K2_Pin */
+	GPIO_InitStruct.Pin = K2_Pin;
+	GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+	GPIO_InitStruct.Pull = GPIO_NOPULL;
+	HAL_GPIO_Init(K2_GPIO_Port, &GPIO_InitStruct);
 
 	/*Configure GPIO pin : K1_Pin */
 	GPIO_InitStruct.Pin = K1_Pin;

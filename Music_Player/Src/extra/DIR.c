@@ -7,26 +7,22 @@
 extern char path[512];
 extern char currentList[20][_MAX_LFN];
 
-void dir_INIT(void) {
-	strcpy(path, "/");
-	getDirList();
-}
-
-void getDirList(void) {
+int getDirList(void) {
 	DIR dirs;
 	FRESULT res;
 	FILINFO Finfo;
 
 	TCHAR LFN[_MAX_LFN];
-	uint8_t count = 1;
+	uint8_t count = 0;
 	char *fn;
 
 	Finfo.lfname = LFN;
 	Finfo.lfsize = _MAX_LFN;
 	memset(currentList, 0, sizeof(currentList));
-
-	strcpy(currentList[0], "..");
-
+	if (strcmp(path, "/") == 0) {
+		strcpy(currentList[0], "..");
+		++count;
+	}
 	res = f_opendir(&dirs, path);
 	if (res == FR_OK) {
 		trace_printf("Opened Dir\n");
@@ -49,10 +45,11 @@ void getDirList(void) {
 			} else {
 				strncpy(currentList[count], fn, Finfo.lfsize);
 			}
-			count++;
+			++count;
 		}
 		f_closedir(&dirs);
 	}
+	return count;
 }
 
 void dir_open(char *pName) {
