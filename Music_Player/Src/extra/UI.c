@@ -14,6 +14,7 @@ void UI_INIT(void) {
 	pageStart = 0;
 	pageEnd = 13;
 
+
 	LCD_DrawLine(19, 262, 19, 273, BLACK);
 	LCD_DrawLine(221, 262, 221, 273, BLACK);
 	LCD_DrawLine(20, 267, 220, 267, BLACK);

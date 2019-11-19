@@ -7,7 +7,7 @@
 extern char path[512];
 extern char currentList[20][_MAX_LFN];
 
-void dir_INIT() {
+void dir_INIT(void) {
 	strcpy(path, "/");
 	getDirList();
 }
