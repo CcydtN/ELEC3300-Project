@@ -6,9 +6,13 @@
 
 extern char path[512];
 extern char currentList[20][_MAX_LFN];
+unsigned int cursor, pageStart, pageEnd;
 
 void UI_INIT(void) {
 	LCD_INIT();
+	cursor = 0;
+	pageStart = 0;
+	pageEnd = 13;
 //	LCD_DrawBox(0, 200, 240, 120, RED, CYAN);
 	LCD_DrawBox(8, 8, 224, 16, RED, CYAN);   //1st song  ARR[0]
 	LCD_DrawBox(8, 26, 224, 16, RED, CYAN);  //2nd song  ARR[1]
@@ -33,4 +37,24 @@ void UI_INIT(void) {
 	LCD_DrawLine(20, 268, 220, 268, BLACK);
 	LCD_DrawString(8, 8, "Fuck You");
 //	trace_printf("WTF\n");
+}
+
+void cursorUP(void) {
+	if (cursor != 0) {
+		cursor--;
+		if ((2 * cursor < pageStart + pageEnd) && (pageStart != 0)) {
+			pageStart--;
+			pageEnd--;
+		}
+	}
+}
+
+void cursorDown(void) {
+	if (cursor != 20) {
+		cursor++;
+		if ((2 * cursor > pageStart + pageEnd) && (pageEnd != 20)) {
+			pageStart--;
+			pageEnd--;
+		}
+	}
 }
