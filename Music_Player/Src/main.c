@@ -149,7 +149,7 @@ int main(void) {
 		trace_printf("Finish Mount\n");
 		UI_INIT();
 
-		wavPlayer(myfile);
+		//wavPlayer(myfile);
 
 	} else {
 		trace_printf("Failed Mount\n");

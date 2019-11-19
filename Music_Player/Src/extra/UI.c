@@ -73,7 +73,7 @@ void UI_INIT(void) {
 void fileListUpdate() {
 	for (int i = 0; i <= 12; ++i) {
 		LCD_OpenWindow(0, 8 + 18 * i, 240, 16);
-		if (i == cursor) {
+		if (i == cursor - pageStart) {
 			LCD_FillColor(240 * 16, BLACK);
 			LCD_DrawString_Reversed(8, 8 + i * 18, currentList[pageStart + i]);
 		} else {
@@ -92,7 +92,7 @@ void cursorUP(void) {
 		}
 		fileListUpdate();
 	}
-	trace_printf("%d", cursor);
+	trace_printf("%d\n", cursor);
 }
 
 void cursorDown(void) {
@@ -104,5 +104,5 @@ void cursorDown(void) {
 		}
 		fileListUpdate();
 	}
-	trace_printf("%d", cursor);
+	trace_printf("%d\n", cursor);
 }
