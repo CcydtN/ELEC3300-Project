@@ -340,11 +340,20 @@ void closefile(void) {
 void HAL_DAC_ConvCpltCallbackCh1(DAC_HandleTypeDef *hdac) {
 	if (WaveDataLength > 0) {
 		HAL_TIM_Base_Stop(&htim2);
-		if (WaveDataLength > 512) {
-			WaveDataLength -= 512;
+		if (s_fmt < 2) {
+			if (WaveDataLength > 256) {
+				WaveDataLength -= 256;
+			} else {
+				WaveDataLength = 0;
+			}
 		} else {
-			WaveDataLength = 0;
+			if (WaveDataLength > 512) {
+				WaveDataLength -= 512;
+			} else {
+				WaveDataLength = 0;
+			}
 		}
+
 		Start_DMA();
 		pullData();
 	} else {

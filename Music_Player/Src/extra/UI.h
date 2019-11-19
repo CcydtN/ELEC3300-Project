@@ -3,6 +3,8 @@
 
 void UI_INIT(void);
 
+void fileListUpdate(void);
+
 void cursorUP(void);
 
 void cursorDown(void);

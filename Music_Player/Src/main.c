@@ -163,7 +163,7 @@ int main(void) {
 	while (1) {
 
 		int K1 = HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_0);
-		int K2 = HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_13)
+		int K2 = HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_13);
 		if (K1) {
 			cursorUP();
 		}

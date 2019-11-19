@@ -3,7 +3,7 @@
 
 void dir_INIT(void);
 
-void getDirList(void);
+int getDirList(void);
 
 void dir_open(char *pName);
 

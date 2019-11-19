@@ -11,20 +11,12 @@ int count;
 
 void UI_INIT(void) {
 	LCD_INIT();
-	strcpy(path, "/");
 	count = getDirList();
 	cursor = 0;
 	pageStart = 0;
-	pageEnd = (count < 13) ? count : 13;
-	for (int i = pageStart; i <= pageEnd; ++i) {
-		if(i == cursor){
-			LCD_OpenWindow(0, 8 + 18*i, 240, 16)
-			LCD_FillCOlor(240*16, BLACK);
-			LCD_DrawString_Reversed(8, 8 + i * 18, currentList[i]);
-	}
-	else
-		LCD_DrawString(8, 8 + i * 18, currentList[i]);
-	}
+	pageEnd = (count < 12) ? count : 12;
+	strcpy(path, "/");
+	fileListUpdate();
 	LCD_DrawLine(19, 262, 19, 273, BLACK);
 	LCD_DrawLine(221, 262, 221, 273, BLACK);
 	LCD_DrawLine(20, 267, 220, 267, BLACK);
@@ -78,22 +70,39 @@ void UI_INIT(void) {
 	}
 }
 
-void cursorUP(void) {
-	if (cursor != 0) {
-		cursor--;
-		if ((2 * cursor < pageStart + pageEnd) && (pageStart != 0)) {
-			pageStart--;
-			pageEnd--;
+void fileListUpdate() {
+	for (int i = 0; i <= 12; ++i) {
+		LCD_OpenWindow(0, 8 + 18 * i, 240, 16);
+		if (i == cursor) {
+			LCD_FillColor(240 * 16, BLACK);
+			LCD_DrawString_Reversed(8, 8 + i * 18, currentList[pageStart + i]);
+		} else {
+			LCD_FillColor(240 * 16, WHITE);
+			LCD_DrawString(8, 8 + i * 18, currentList[pageStart + i]);
 		}
 	}
 }
 
-void cursorDown(void) {
-	if (cursor != 20) {
-		cursor++;
-		if ((2 * cursor > pageStart + pageEnd) && (pageEnd != count)) {
-			pageStart--;
-			pageEnd--;
+void cursorUP(void) {
+	if (cursor > 0) {
+		--cursor;
+		if ((cursor < pageStart + 6) && (pageStart > 0)) {
+			--pageStart;
+			--pageEnd;
 		}
+		fileListUpdate();
 	}
+	trace_printf("%d", cursor);
+}
+
+void cursorDown(void) {
+	if (cursor < count - 1) {
+		++cursor;
+		if ((cursor > pageEnd - 6) && (pageEnd < count - 1)) {
+			++pageStart;
+			++pageEnd;
+		}
+		fileListUpdate();
+	}
+	trace_printf("%d", cursor);
 }
