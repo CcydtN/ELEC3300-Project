@@ -162,41 +162,22 @@ int main(void)
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-	int pin12, pin13, pin14, pin15;
-	int past12 = 0, past13 = 0, past14 = 0, past15 = 0;
+	GPIO_PinState pin12, pin13;
 
 	while (1) {
 
 		int K1 = HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_0);
 		int K2 = HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_13);
-		if (K1) {
-			cursorUP();
-		}
-		if (K2) {
-			cursorDown();
-		}
+
 		pin12 = HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_12);
 		pin13 = HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_13);
-		pin14 = HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_14);
-		pin15 = HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_15);
 
-		if (pin12 && (pin12 != past12)) {
-			trace_printf("PIN 12 ON\n");
+		if (pin12) {
+			cursorUP();
 		}
-		if (pin13 && (pin13 != past13)) {
-			trace_printf("PIN 13 ON\n");
+		if (pin13) {
+			cursorDown();
 		}
-		if (pin14 && (pin14 != past14)) {
-			trace_printf("PIN 14 ON\n");
-		}
-		if (pin15 && (pin15 != past15)) {
-			trace_printf("PIN 15 ON\n");
-		}
-		past12 = pin12;
-		past13 = pin13;
-		past14 = pin14;
-		past15 = pin15;
-
 //		closefile();
 //		if (mount == 1) {
 //			mount = !(f_mount(NULL, SDPath, 1) == 0);
@@ -479,9 +460,15 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(K1_GPIO_Port, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : PB12 PB13 PB14 PB15 */
-  GPIO_InitStruct.Pin = GPIO_PIN_12|GPIO_PIN_13|GPIO_PIN_14|GPIO_PIN_15;
+  /*Configure GPIO pins : PB12 PB13 */
+  GPIO_InitStruct.Pin = GPIO_PIN_12|GPIO_PIN_13;
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+  GPIO_InitStruct.Pull = GPIO_PULLDOWN;
+  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+
+  /*Configure GPIO pin : PB14 */
+  GPIO_InitStruct.Pin = GPIO_PIN_14;
+  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
   GPIO_InitStruct.Pull = GPIO_PULLDOWN;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
@@ -505,6 +492,10 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
   HAL_GPIO_Init(LCD_RST_GPIO_Port, &GPIO_InitStruct);
+
+  /* EXTI interrupt init*/
+  HAL_NVIC_SetPriority(EXTI15_10_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(EXTI15_10_IRQn);
 
 }
 
