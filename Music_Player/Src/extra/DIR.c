@@ -54,13 +54,13 @@ int getDirList(void) {
 	return count;
 }
 
-void dir_open(char *pName) {
+int dir_open(char *pName) {
 	FRESULT res = f_chdir(pName);
 	if (res == FR_OK) {
 		f_getcwd(path, _MAX_LFN);
-		getDirList();
+		return getDirList();
 	} else {
-
+		return -1;
 	}
 }
 
