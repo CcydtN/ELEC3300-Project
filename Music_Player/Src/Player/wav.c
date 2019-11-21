@@ -6,8 +6,6 @@
 
 extern DAC_HandleTypeDef hdac;
 extern TIM_HandleTypeDef htim2;
-extern DMA_HandleTypeDef hdma_dac_ch1;
-extern DMA_HandleTypeDef hdma_dac_ch2;
 
 FIL pfile;
 UINT br;
@@ -212,17 +210,6 @@ void TIM_reINIT(uint16_t psc, uint16_t arr) {
 	htim2.Init.Period = (uint32_t) arr;
 	HAL_TIM_Base_Init(&htim2);
 }
-
-//void DMA_reINIT(void) {
-//	HAL_DAC_MspDeInit(&hdac);
-//	hdma_dac_ch1.Init.PeriphDataAlignment = DMA_PDATAALIGN_BYTE;
-//	hdma_dac_ch2.Init.PeriphDataAlignment = DMA_PDATAALIGN_BYTE;
-//	hdma_dac_ch1.Init.MemDataAlignment = DMA_MDATAALIGN_BYTE;
-//	hdma_dac_ch2.Init.MemDataAlignment = DMA_MDATAALIGN_BYTE;
-//
-//	HAL_DMA_Init(&hdma_dac_ch1);
-//	HAL_DMA_Init(&hdma_dac_ch2);
-//}
 
 void pullData(void) {
 	if (s_fmt < 2) {

@@ -7,4 +7,6 @@ int getDirList(void);
 
 void dir_open(char *pName);
 
+void sort(int n);
+
 #endif

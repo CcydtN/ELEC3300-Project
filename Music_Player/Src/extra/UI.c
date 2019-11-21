@@ -11,11 +11,11 @@ int count;
 
 void UI_INIT(void) {
 	LCD_INIT();
+	strcpy(path, "/");
 	count = getDirList();
 	cursor = 0;
 	pageStart = 0;
 	pageEnd = (count < 12) ? count : 12;
-	strcpy(path, "/");
 	fileListUpdate();
 	LCD_DrawLine(19, 262, 19, 273, BLACK);
 	LCD_DrawLine(221, 262, 221, 273, BLACK);
@@ -61,10 +61,10 @@ void UI_INIT(void) {
 	}
 	LCD_OpenWindow(162, 296, 16, 16);
 	LCD_Write_Cmd( CMD_SetPixel);
-	ucTemp = icon[2][ucPage];
+	ucTemp = icon[3][ucPage];
 	for (ucColumn = 0; ucColumn < 8; ucColumn++) {
 		for (ucPage = 0; ucPage < 32; ucPage++) {
-			ucTemp = icon[2][ucPage];
+			ucTemp = icon[3][ucPage];
 			for (ucColumn = 0; ucColumn < 8; ucColumn++) {
 				if (ucTemp & 0x01)
 					LCD_Write_Data(0xFFFF);
@@ -99,7 +99,7 @@ void cursorUP(void) {
 		}
 		fileListUpdate();
 	}
-	trace_printf("%d\n", cursor);
+	//trace_printf("%d\n", cursor);
 }
 
 void cursorDown(void) {
@@ -111,5 +111,6 @@ void cursorDown(void) {
 		}
 		fileListUpdate();
 	}
-	trace_printf("%d\n", cursor);
+	//trace_printf("%d\n", cursor);
 }
+

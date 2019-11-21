@@ -3,6 +3,7 @@
 #include "ffconf.h"
 #include "string.h"
 #include "Trace.h"
+#include "stdlib.h"
 
 extern char path[512];
 extern char currentList[20][_MAX_LFN];
@@ -19,7 +20,7 @@ int getDirList(void) {
 	Finfo.lfname = LFN;
 	Finfo.lfsize = _MAX_LFN;
 	memset(currentList, 0, sizeof(currentList));
-	if (strcmp(path, "/") == 0) {
+	if (strcmp(path, "/") != 0) {
 		strcpy(currentList[0], "..");
 		++count;
 	}
@@ -49,6 +50,7 @@ int getDirList(void) {
 		}
 		f_closedir(&dirs);
 	}
+	sort(count);
 	return count;
 }
 
@@ -61,3 +63,17 @@ void dir_open(char *pName) {
 
 	}
 }
+
+void sort(int n) {
+	for (int i = 0; i < n; ++i) {
+		char temp[_MAX_LFN];
+		strcpy(temp, currentList[i]);
+		int j = i - 1;
+		while (j >= 0 && strcmp(temp, currentList[j]) < 0) {
+			strcpy(currentList[j + 1], currentList[j]);
+			--j;
+		}
+		strcpy(currentList[j + 1], temp);
+	}
+}
+
