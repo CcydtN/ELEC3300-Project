@@ -116,7 +116,12 @@ void cursorDown(void) {
 
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
 	if (GPIO_Pin == GPIO_PIN_14) {
-		dir_open(currentList[cursor]);
-		fileListUpdate();
+		int temp = dir_open(currentList[cursor]);
+		if (temp != -1) {
+			count = temp;
+			fileListUpdate();
+		} else {
+
+		}
 	}
 }

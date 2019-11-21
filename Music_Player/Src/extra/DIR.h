@@ -5,7 +5,7 @@ void dir_INIT(void);
 
 int getDirList(void);
 
-void dir_open(char *pName);
+int dir_open(char *pName);
 
 void sort(int n);
 
