@@ -16,10 +16,11 @@ uint16_t *data[2];
 uint8_t Buffer[2][FullSize];
 enum short_fmt s_fmt;
 
-BYTE pdata = 0;
+BYTE pdata;
 
 void wavPlayer(char *fname) {
 	FRESULT res;
+	pdata = 0;
 	res = f_open(&pfile, fname, FA_OPEN_EXISTING | FA_READ);
 	if (res == FR_OK) {
 		trace_printf("Opened\n");
@@ -27,6 +28,7 @@ void wavPlayer(char *fname) {
 			data[i] = Buffer[i];
 		}
 		//
+		s_fmt = 0;
 		pullHeader();
 		//printFullHeader();
 
@@ -45,7 +47,7 @@ void wavPlayer(char *fname) {
 			pullData();
 			//
 		} else {
-			trace_printf("Some thing wrong in header,plz check");
+			trace_printf("Something wrong in header,plz check\n");
 		}
 	}
 }

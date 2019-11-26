@@ -3,6 +3,7 @@
 #include "lcd.h"
 #include "string.h"
 #include "Trace.h"
+#include "wav.h"
 
 extern char path[512];
 extern char currentList[20][_MAX_LFN];
@@ -121,7 +122,19 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
 			count = temp;
 			fileListUpdate();
 		} else {
+			closefile();
+			char file[_MAX_LFN];
+			strcpy(file, path);
+			if (strcmp(path, "/") != 0)
+				strcat(file, "/");
+			strcat(file, currentList[cursor]);
+			trace_printf("%s\n", file);
+			wavPlayer(file);
+			LCD_OpenWindow(0, 278, 240, 16);
+			LCD_FillColor(240 * 16, WHITE);
+			LCD_DrawString(8, 278, currentList[cursor]);
 
 		}
 	}
 }
+
