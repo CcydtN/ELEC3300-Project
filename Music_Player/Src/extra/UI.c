@@ -120,6 +120,10 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
 		int temp = dir_open(currentList[cursor]);
 		if (temp != -1) {
 			count = temp;
+			trace_printf("%d\n", count);
+			cursor = 0;
+			pageStart = 0;
+			pageEnd = (count < 12) ? count : 12;
 			fileListUpdate();
 		} else {
 			closefile();
@@ -133,8 +137,6 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
 			LCD_OpenWindow(0, 278, 240, 16);
 			LCD_FillColor(240 * 16, WHITE);
 			LCD_DrawString(8, 278, currentList[cursor]);
-
 		}
 	}
 }
-
