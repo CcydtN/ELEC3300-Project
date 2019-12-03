@@ -7,7 +7,7 @@
 
 extern char path[512];
 extern char currentList[20][_MAX_LFN];
-extern enum status;
+extern enum stat status;
 unsigned int cursor, pageStart, pageEnd;
 int count;
 
@@ -59,32 +59,29 @@ void UI_INIT(void) {
 		}
 	}
 	LCD_OpenWindow(112, 296, 16, 16);
-    	LCD_Write_Cmd( CMD_SetPixel);
-	if(status == pause)
-	{
-        for (ucPage = 0; ucPage < 32; ucPage++) {
-                ucTemp = icon[1][ucPage];
-                for (ucColumn = 0; ucColumn < 8; ucColumn++) {
-                    if (ucTemp & 0x80)
-                        LCD_Write_Data(0xFFFF);
-                    else
-                        LCD_Write_Data(0x001F);
-                    ucTemp <<= 1;
-                }
-        }
-	}
-	else if (status == play)
-	{
-	    for (ucPage = 0; ucPage < 32; ucPage++) {
-        	ucTemp = icon[2][ucPage];
-        	for (ucColumn = 0; ucColumn < 8; ucColumn++) {
-        		if (ucTemp & 0x80)
-        			LCD_Write_Data(0xFFFF);
-        		else
-        			LCD_Write_Data(0x001F);
-        		ucTemp <<= 1;
-        	}
-        }
+	LCD_Write_Cmd( CMD_SetPixel);
+	if (status == Pause) {
+		for (ucPage = 0; ucPage < 32; ucPage++) {
+			ucTemp = icon[1][ucPage];
+			for (ucColumn = 0; ucColumn < 8; ucColumn++) {
+				if (ucTemp & 0x80)
+					LCD_Write_Data(0xFFFF);
+				else
+					LCD_Write_Data(0x001F);
+				ucTemp <<= 1;
+			}
+		}
+	} else if (status == Play) {
+		for (ucPage = 0; ucPage < 32; ucPage++) {
+			ucTemp = icon[2][ucPage];
+			for (ucColumn = 0; ucColumn < 8; ucColumn++) {
+				if (ucTemp & 0x80)
+					LCD_Write_Data(0xFFFF);
+				else
+					LCD_Write_Data(0x001F);
+				ucTemp <<= 1;
+			}
+		}
 	}
 	LCD_OpenWindow(162, 296, 16, 16);
 	LCD_Write_Cmd( CMD_SetPixel);

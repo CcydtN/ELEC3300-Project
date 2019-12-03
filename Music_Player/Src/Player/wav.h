@@ -9,6 +9,11 @@
 enum short_fmt {
 	PCM_8_mono = 0, PCM_8_stereo, PCM_16_mono, PCM_16_stereo
 };
+
+enum stat {
+	Pause = 0, Play
+};
+
 // WAVE file header format
 struct FORMAT {
 	//"fmt "(with a space)
