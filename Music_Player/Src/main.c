@@ -30,11 +30,11 @@
 #include "Trace.h"
 
 #include "stdbool.h"
-#include "wav.c"
 #include "UI.c"
 #include "lcd.h"
 #include "DIR.h"
 
+#include "temp.c"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/

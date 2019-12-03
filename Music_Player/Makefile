@@ -71,7 +71,10 @@ Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_adc_ex.c \
 Src/DebugPrint/Trace.c \
 Src/DebugPrint/trace_impl.c \
 Src/LCD/lcd.c \
-Src/extra/DIR.c
+Src/extra/DIR.c \
+
+
+
 
 # ASM sources
 ASM_SOURCES =  \
@@ -124,7 +127,6 @@ C_DEFS =  \
 -DTRACE \
 -DOS_USE_TRACE_SEMIHOSTING_STDOUT \
 -DOS_HAS_NO_CORE_DEBUG \
--DHELIX_CONFIG_FIXEDPOINT
 
 
 # AS includes
@@ -142,9 +144,9 @@ C_INCLUDES =  \
 -ISrc/extra \
 -ISrc/DebugPrint \
 -ISrc/Player \
--ISrc/LCD
-
-
+-ISrc/LCD \
+-ISrc/Player/ogg \
+-IC:\cygwin64\usr\include \
 
 # compile gcc flags
 ASFLAGS = $(MCU) $(AS_DEFS) $(AS_INCLUDES) $(OPT) -Wall -fdata-sections -ffunction-sections --gc-sections
@@ -167,9 +169,10 @@ CFLAGS += -MMD -MP -MF"$(@:%.o=%.d)"
 LDSCRIPT = STM32F103VETx_FLASH.ld
 
 # libraries
-LIBS = -lc -lm -lnosys 
-LIBDIR = 
+LIBS = -lc -lm -lnosys -llibvorbisidec -libogg -libogg.dll -lcygogg-0
+LIBDIR = -LC:\Users\kenny\Documents\GitHub\elec3300\Music_Player\Src\libs\
 LDFLAGS = $(MCU) -specs=nano.specs -T$(LDSCRIPT) $(LIBDIR) $(LIBS) -Wl,-Map=$(BUILD_DIR)/$(TARGET).map,--cref -Wl,--gc-sections
+
 # default action: build all
 all: $(BUILD_DIR)/$(TARGET).elf $(BUILD_DIR)/$(TARGET).hex $(BUILD_DIR)/$(TARGET).bin
 
@@ -188,7 +191,7 @@ $(BUILD_DIR)/%.o: %.c Makefile | $(BUILD_DIR)
 
 $(BUILD_DIR)/%.o: %.s Makefile | $(BUILD_DIR)
 	$(AS) -c $(CFLAGS) $< -o $@
-	
+
 $(BUILD_DIR)/$(TARGET).elf: $(OBJECTS) Makefile
 	$(CC) $(OBJECTS) $(LDFLAGS) -o $@
 	$(SZ) $@
@@ -201,8 +204,7 @@ $(BUILD_DIR)/%.bin: $(BUILD_DIR)/%.elf | $(BUILD_DIR)
 	
 $(BUILD_DIR):
 	mkdir $@		
-	$(SZ) --format=berkeley ${TARGET}
-	
+		
 #######################################
 # clean up
 #######################################
