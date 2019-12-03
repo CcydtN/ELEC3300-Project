@@ -34,6 +34,7 @@
 #include "UI.c"
 #include "lcd.h"
 #include "DIR.h"
+#include "bsp_xpt2046_lcd.h"
 
 /* USER CODE END Includes */
 
@@ -96,6 +97,11 @@ static void MX_ADC1_Init(void);
 int main(void) {
 	/* USER CODE BEGIN 1 */
 
+	XPT2046_Init ();
+	while( ! XPT2046_Touch_Calibrate () );    
+
+	LCD_GramScan ( 1 );
+	
 	/* USER CODE END 1 */
 
 	/* MCU Configuration--------------------------------------------------------*/
@@ -162,6 +168,11 @@ int main(void) {
 	GPIO_PinState pin12, pin13;
 
 	while (1) {
+		 if ( ucXPT2046_TouchFlag == 1 )	         
+    			{
+				Check_touchkey();			
+     				ucXPT2046_TouchFlag = 0;		            
+ 		  	}	
 
 		int K1 = HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_0);
 		int K2 = HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_13);

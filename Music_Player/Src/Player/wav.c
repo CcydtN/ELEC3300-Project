@@ -15,6 +15,7 @@ unsigned int WaveDataLength;
 uint16_t *data[2];
 uint8_t Buffer[2][FullSize];
 enum short_fmt s_fmt;
+enum status {pause = 0, play};
 
 BYTE pdata;
 
@@ -43,6 +44,7 @@ void wavPlayer(char *fname) {
 			f_lseek(&pfile, header.data.pStart);
 			WaveDataLength = header.data.size;
 			pullData();
+			status = play;
 			Start_DMA();
 			pullData();
 			//
@@ -320,7 +322,8 @@ void Start_DMA(void) {
 void closefile(void) {
 	HAL_DAC_Stop_DMA(&hdac, DAC_CHANNEL_1);
 	HAL_DAC_Stop_DMA(&hdac, DAC_CHANNEL_2);
-	HAL_TIM_Base_Stop_IT(&htim2);
+	HAL_TIM_Base_Stop(&htim2);
+	status = pause;
 	if (f_close(&pfile) == FR_OK) {
 		trace_printf("File Closed\n");
 	};
