@@ -7,7 +7,6 @@
 //static void                   XPT2046_EXTI_NVIC_Config              ( void );
 //static void                   XPT2046_GPIO_SPI_Config               ( void );
 
-static void                   XPT2046_WriteCMD                      ( uint8_t ucCmd );
 static void XPT2046_DelayUS( __IO uint32_t ulCount);
 static void XPT2046_WriteCMD(uint8_t ucCmd);
 static uint16_t XPT2046_ReadCMD(void);
