@@ -25,7 +25,7 @@ const unsigned char icon[4][32] =
 
 void UI_INIT(void);
 
-void Update_Button(int);
+void Update_Button();
 
 void fileListUpdate(void);
 

@@ -12,12 +12,10 @@ extern char currentList[20][_MAX_LFN];
 char playingList[20][_MAX_LFN];
 char playingPath[512];
 int playingCursor;
-extern enum stat status;
 unsigned int cursor, pageStart, pageEnd;
 int count;
 
 void UI_INIT(void) {
-	status = Pause;
 	LCD_INIT();
 	strcpy(path, "/");
 	count = getDirList();
@@ -30,10 +28,10 @@ void UI_INIT(void) {
 	LCD_DrawLine(20, 267, 220, 267, BLACK);
 	LCD_DrawLine(20, 268, 220, 268, BLACK);
 
-	Update_Button(status);
+	Update_Button();
 }
 
-void Update_Button(int status) {
+void Update_Button() {
 	uint8_t ucTemp, ucPage, ucColumn;
 
 	LCD_OpenWindow(62, 296, 16, 16);
@@ -93,7 +91,7 @@ void Update_Button(int status) {
 	}
 	LCD_OpenWindow(112, 296, 16, 16);
 	LCD_Write_Cmd( CMD_SetPixel);
-	if (status == Pause) {
+	if (getStatus() == Pause) {
 		for (ucPage = 0; ucPage < 32; ucPage++) {
 			ucTemp = icon[1][ucPage];
 			for (ucColumn = 0; ucColumn < 8; ucColumn++) {
@@ -104,7 +102,7 @@ void Update_Button(int status) {
 				ucTemp <<= 1;
 			}
 		}
-	} else if (status == Play) {
+	} else {
 		for (ucPage = 0; ucPage < 32; ucPage++) {
 			ucTemp = icon[2][ucPage];
 			for (ucColumn = 0; ucColumn < 8; ucColumn++) {
@@ -119,7 +117,6 @@ void Update_Button(int status) {
 }
 
 void fileListUpdate() {
-
 	char temp[27];
 	for (int i = 0; i <= 12; ++i) {
 		LCD_OpenWindow(0, 8 + 18 * i, 240, 16);
@@ -169,7 +166,7 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
 			pageStart = 0;
 			pageEnd = (count < 12) ? count : 12;
 			fileListUpdate();
-			Update_Button(status);
+			Update_Button();
 		} else {
 			closefile();
 			char file[_MAX_LFN];
@@ -179,13 +176,12 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
 
 			playingCursor = cursor;
 			strcat(file, currentList[playingCursor]);
-			trace_printf("%s\n", file);
 			player(file);
-			status = Play;
+			setStatus(1);
 
 			memcpy(playingList, currentList, 20 * _MAX_LFN);
 			strcpy(playingPath, path);
-			Update_Button(status);
+			Update_Button();
 
 			LCD_OpenWindow(0, 296, 61, 16);
 			LCD_FillColor(61 * 16, WHITE);

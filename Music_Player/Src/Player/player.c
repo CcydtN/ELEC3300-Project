@@ -24,14 +24,14 @@ vorbis_info *info;
 //For wav
 struct HEADER header;
 
-enum stat status;
+enum stat status = 0;
 enum short_fmt s_fmt;
 int bytes_read, bytes_finish, temp, pdata;
 
 size_t alt_read(void *ptr, size_t size, size_t nmemb, void *datasource) {
 	if (!f_eof(&pfile)) {
-		f_read(datasource, ptr, size * nmemb, &br);
-		return (br / size);
+		f_read(&pfile, ptr, size * nmemb, &br);
+		return br;
 	} else
 		return 0;
 }
@@ -63,8 +63,8 @@ long alt_tell(void *datasource) {
 
 int player(char *fname) {
 	checkExtension(fname);
-	trace_printf("%d\n", type);
 	FRESULT res;
+	trace_printf("%s\n", fname);
 	res = f_open(&pfile, fname, FA_OPEN_EXISTING | FA_READ);
 	if (res == FR_OK && type != 0) {
 		pdata = 0;
@@ -84,10 +84,9 @@ int player(char *fname) {
 			callbacks.close_func = alt_close;
 			callbacks.tell_func = alt_tell;
 			ov_open_callbacks(&pfile, &vf, NULL, 0, callbacks);
-
+			//trace_printf("ogg opened");
 			info = ov_info(&vf, -1);
 			s_fmt = 1 + info->channels;
-
 			pullData();
 		} else {
 			return 1;
@@ -115,9 +114,9 @@ void checkExtension(char *fname) {
 	}
 }
 
-int getRate(void) {
+long getRate(void) {
 	if (type == wav) {
-		return header.format.byterate;
+		return (long) header.format.byterate;
 	} else if (type == ogg) {
 		return info->rate;
 	}
@@ -267,7 +266,11 @@ void closefile(void) {
 
 void pullData(void) {
 	if (type == wav) {
-		f_read(&pfile, output[pdata], sizeof(output[pdata]), &br);
+		if (s_fmt == PCM_8_mono || s_fmt == PCM_8_stereo) {
+			f_read(&pfile, output[pdata], sizeof(output[pdata]) / 2, &br);
+		} else {
+			f_read(&pfile, output[pdata], sizeof(output[pdata]), &br);
+		}
 		bytes_read = br;
 	} else if (type == ogg) {
 		bytes_read = ov_read(&vf, output[pdata], sizeof(output[pdata]),
@@ -281,22 +284,31 @@ void dataProcess(void) {
 	unsigned short int *temp16;
 	switch (s_fmt) {
 	case PCM_8_mono:
+		temp8 = output[pdata];
+		temp16 = calloc(bytes_read, sizeof(unsigned short int));
+		for (int i = 0; i < bytes_read; i++) {
+			temp16[i] = (unsigned short int) temp8[i];
+		}
+		memcpy(output[pdata], temp16, 2 * bytes_read);
 		break;
 	case PCM_8_stereo:
-		temp8 = malloc(bytes_read);
+		temp8 = output[pdata];
+		temp16 = calloc(bytes_read, sizeof(unsigned short int));
 		for (int i = 0; i < bytes_read / 2; i++) {
-			temp8[i] = output[pdata][i];
-			temp8[i + bytes_read / 2] = output[pdata][i + 1];
+			temp16[i] = (unsigned short int) temp8[i];
+			temp16[i + bytes_read / 2] = (unsigned short int) temp8[i + 1];
 		}
-		memcpy(output[pdata], temp8, bytes_read);
+		memcpy(output[pdata], temp16, 2 * bytes_read);
 		break;
 	case PCM_16_mono:
+		temp16 = calloc(bytes_read, sizeof(unsigned short int));
 		for (int i = 0; i < bytes_read / 2; i++) {
-			output[pdata][i] ^= 0x8000;
+			temp16[i] = output[pdata][i] ^ 0x8000;
 		}
+		memcpy(output[pdata], temp16, bytes_read);
 		break;
 	case PCM_16_stereo:
-		temp16 = malloc(bytes_read);
+		temp16 = calloc(bytes_read, sizeof(unsigned short int));
 		for (int i = 0; i < bytes_read / 4; i++) {
 			temp16[i] = output[pdata][2 * i] ^ 0x8000;
 			temp16[i + bytes_read / 4] = output[pdata][2 * i + 1] ^ 0x8000;
@@ -304,6 +316,7 @@ void dataProcess(void) {
 		memcpy(output[pdata], temp16, bytes_read);
 		break;
 	}
+	free(temp16);
 }
 
 void Start_DMA(void) {
@@ -318,10 +331,10 @@ void Start_DMA(void) {
 		break;
 	case PCM_8_stereo:
 		HAL_DAC_Start_DMA(&hdac, DAC_CHANNEL_1, (uint32_t*) output[pdata],
-				bytes_read / 2,
+				bytes_read,
 				DAC_ALIGN_8B_R);
 		HAL_DAC_Start_DMA(&hdac, DAC_CHANNEL_2,
-				(uint32_t*) &(output[pdata][bytes_read / 2]), bytes_read / 2,
+				(uint32_t*) &(output[pdata][bytes_read / 2]), bytes_read,
 				DAC_ALIGN_8B_R);
 		break;
 	case PCM_16_mono:
@@ -369,12 +382,20 @@ bool End(void) {
 	}
 }
 
-int getTime() {
-
+float getTimePercentage() {
+	if (type == wav) {
+		return bytes_finish / header.data.size;
+	} else if (type == ogg) {
+		return ov_time_tell(&vf) / (1000 * ov_time_total(&vf, -1));
+	}
 }
 
 int getStatus(void) {
 	return status;
+}
+
+void setStatus(enum stat input) {
+	status = input;
 }
 
 void player_play(void) {

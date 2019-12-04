@@ -149,7 +149,7 @@ int main(void) {
 	if (mount == 1) {
 		trace_printf("Finish Mount\n");
 		UI_INIT();
-		//player("/Example_mono.ogg");
+//		player("/Example_mono.ogg");
 //		oggPlayer("/Example.ogg");
 //		oggPlayer("/Example_mono.ogg");
 //		oggPlayer("/Example_mono_lowF.ogg");

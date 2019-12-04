@@ -6,7 +6,7 @@
 #include "stdlib.h"
 
 extern char path[512];
-extern char currentList[20][_MAX_LFN / 2];
+extern char currentList[20][_MAX_LFN];
 
 int getDirList(void) {
 	DIR dirs;

@@ -82,7 +82,7 @@ int player(char *fname);
 
 void checkExtension(char *fname);
 
-int getRate(void);
+long getRate(void);
 
 void printINFO(void);
 
@@ -108,7 +108,11 @@ void TIM_reINIT(uint16_t sampleRate);
 
 bool End(void);
 
+float getTimePercentage();
+
 int getStatus();
+
+void setStatus(enum stat input);
 
 void player_play();
 
