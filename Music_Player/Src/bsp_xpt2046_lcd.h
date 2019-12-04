@@ -66,7 +66,7 @@ extern volatile uint8_t ucXPT2046_TouchFlag;
 
 extern strType_XPT2046_TouchPara strXPT2046_TouchPara;
 
-void XPT2046_Init(void);
+/*void XPT2046_Init(void);*/
 
 uint8_t XPT2046_Touch_Calibrate(void);
 uint8_t XPT2046_Get_TouchedPoint(strType_XPT2046_Coordinate *displayPtr,

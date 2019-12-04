@@ -8,12 +8,9 @@ static void XPT2046_WriteCMD(uint8_t ucCmd);
 static uint16_t XPT2046_ReadCMD(void);
 static uint16_t XPT2046_ReadAdc(uint8_t ucChannel);
 static void XPT2046_ReadAdc_XY(int16_t *sX_Ad, int16_t *sY_Ad);
-static uint8_t XPT2046_ReadAdc_Smooth_XY(
-		strType_XPT2046_Coordinate *pScreenCoordinate);
-static uint8_t XPT2046_Calculate_CalibrationFactor(
-		strType_XPT2046_Coordinate *pDisplayCoordinate,
-		strType_XPT2046_Coordinate *pScreenSample,
-		strType_XPT2046_Calibration *pCalibrationFactor);
+static uint8_t XPT2046_ReadAdc_Smooth_XY(strType_XPT2046_Coordinate *pScreenCoordinate);
+static uint8_t XPT2046_Calculate_CalibrationFactor(strType_XPT2046_Coordinate *pDisplayCoordinate,strType_XPT2046_Coordinate *pScreenSample,strType_XPT2046_Calibration *pCalibrationFactor);
+
 extern TIM_HandleTypeDef htim2;
 extern enum stat status;
 
@@ -23,7 +20,7 @@ strType_XPT2046_TouchPara strXPT2046_TouchPara = { 0.085958, -0.001073,
 
 volatile uint8_t ucXPT2046_TouchFlag = 0;
 
-GPIO_InitTypeDef GPIO_InitStructure;
+//GPIO_InitTypeDef GPIO_InitStructure;
 
 static void XPT2046_DelayUS( __IO uint32_t ulCount) {
 	uint32_t i;
@@ -31,8 +28,7 @@ static void XPT2046_DelayUS( __IO uint32_t ulCount) {
 	for (i = 0; i < ulCount; i++) {
 		uint8_t uc = 12;
 
-		while (uc--)
-			;
+		while (uc--);
 
 	}
 
@@ -221,8 +217,8 @@ static uint8_t XPT2046_ReadAdc_Smooth_XY ( strType_XPT2046_Coordinate * pScreenC
 
 
 #else
-static uint8_t XPT2046_ReadAdc_Smooth_XY(
-		strType_XPT2046_Coordinate *pScreenCoordinate) {
+static uint8_t XPT2046_ReadAdc_Smooth_XY(strType_XPT2046_Coordinate *pScreenCoordinate)
+{
 	uint8_t ucCount = 0, i;
 
 	int16_t sAD_X, sAD_Y;
@@ -351,7 +347,7 @@ static uint8_t XPT2046_Calculate_CalibrationFactor(
 	return ucRet;
 
 }
-/*
+
  uint8_t XPT2046_Touch_Calibrate(void) {
  #if 1
  uint8_t i;
@@ -393,17 +389,11 @@ static uint8_t XPT2046_Calculate_CalibrationFactor(
  LCD_Clear(0, 0, usScreenWidth, usScreenHeigth, BACKGROUND);
 
  pStr = "Touch Calibrate ......";
- LCD_DrawString_Color(
- (usScreenWidth - (strlen(pStr) - 7) * WIDTH_EN_CHAR) >> 1,
- usScreenHeigth >> 1, pStr, BACKGROUND, RED);
-
+ LCD_DrawString(( usScreenWidth - ( strlen ( pStr ) - 7 ) * WIDTH_EN_CHAR ) >> 1, usScreenHeigth >> 1, pStr);
  sprintf(cStr, "%d", i + 1);
- LCD_DrawString_Color(usScreenWidth >> 1,
- (usScreenHeigth >> 1) - HEIGHT_EN_CHAR, cStr, BACKGROUND, RED);
+ LCD_DrawString(usScreenWidth >> 1, ( usScreenHeigth >> 1 ) - HEIGHT_EN_CHAR, cStr);
 
  XPT2046_DelayUS(100000);
-
- LCD_DrawCross(strCrossCoordinate[i].x, strCrossCoordinate[i].y);
 
  while (!XPT2046_ReadAdc_Smooth_XY(&strScreenSample[i]))
  ;
@@ -454,8 +444,7 @@ static uint8_t XPT2046_Calculate_CalibrationFactor(
  LCD_Clear(0, 0, usScreenWidth, usScreenHeigth, BACKGROUND);
 
  pStr = "Calibrate Succed";
- LCD_DrawString_Color((usScreenWidth - strlen(pStr) * WIDTH_EN_CHAR) >> 1,
- usScreenHeigth >> 1, pStr, BACKGROUND, RED);
+ LCD_DrawString(( usScreenWidth - strlen ( pStr ) * WIDTH_EN_CHAR ) >> 1, usScreenHeigth >> 1, pStr);
 
  XPT2046_DelayUS(200000);
 
@@ -466,15 +455,11 @@ static uint8_t XPT2046_Calculate_CalibrationFactor(
  LCD_Clear(0, 0, usScreenWidth, usScreenHeigth, BACKGROUND);
 
  pStr = "Calibrate fail";
- LCD_DrawString_Color((usScreenWidth - strlen(pStr) * WIDTH_EN_CHAR) >> 1,
- usScreenHeigth >> 1, pStr, BACKGROUND, RED);
+ LCD_DrawString(( usScreenWidth - strlen ( pStr ) * WIDTH_EN_CHAR ) >> 1, usScreenHeigth >> 1, pStr);
 
  pStr = "try again";
- LCD_DrawString_Color((usScreenWidth - strlen(pStr) * WIDTH_EN_CHAR) >> 1,
- (usScreenHeigth >> 1) + HEIGHT_EN_CHAR, pStr, BACKGROUND, RED);
-
- XPT2046_DelayUS(1000000);
-
+ LCD_DrawString(( usScreenWidth - strlen ( pStr ) * WIDTH_EN_CHAR ) >> 1, ( usScreenHeigth >> 1 ) + HEIGHT_EN_CHAR, pStr) ;
+ XPT2046_DelayUS ( 1000000 );
  return 0;
 
  }*/
