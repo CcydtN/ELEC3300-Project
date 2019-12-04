@@ -3,9 +3,11 @@
 #include "lcd.h"
 #include "string.h"
 #include "Trace.h"
-#include "wav.h"
+#include "ffconf.h"
+#include "player.h"
 
 extern char path[512];
+
 extern char currentList[20][_MAX_LFN];
 char playingList[20][_MAX_LFN];
 char playingPath[512];
@@ -117,6 +119,7 @@ void Update_Button(int status) {
 }
 
 void fileListUpdate() {
+
 	char temp[27];
 	for (int i = 0; i <= 12; ++i) {
 		LCD_OpenWindow(0, 8 + 18 * i, 240, 16);
@@ -173,10 +176,11 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
 			strcpy(file, path);
 			if (strcmp(path, "/") != 0)
 				strcat(file, "/");
+
 			playingCursor = cursor;
 			strcat(file, currentList[playingCursor]);
 			trace_printf("%s\n", file);
-			wavPlayer(file);
+			player(file);
 			status = Play;
 
 			memcpy(playingList, currentList, 20 * _MAX_LFN);

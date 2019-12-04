@@ -1,19 +1,14 @@
-#ifndef _WAV_H_
-#define _WAV_H_
+#ifndef SRC_PLAYER_PLAYER_H_
+#define SRC_PLAYER_PLAYER_H_
 
-//Array size constant
-#define FullSize	512
-#define HalfSize	256
-#define QuarSize	128
+#include "stdbool.h"
 
-enum short_fmt {
-	PCM_8_mono = 0, PCM_8_stereo, PCM_16_mono, PCM_16_stereo
-};
+//For OGG
+#include "config_types.h"
+#include "ivorbiscodec.h"
+#include "ivorbisfile.h"
 
-
-enum stat {
-	Pause = 0, Play
-};
+//For WAV
 
 // WAVE file header format
 struct FORMAT {
@@ -41,7 +36,7 @@ struct DATA {
 	//total size of data = NumSamples* NumChannels*BitPerSample/8
 	unsigned int size;
 	//Start pointer, for data reading in later
-	DWORD pStart;
+	unsigned long pStart;
 };
 
 struct LIST {
@@ -72,9 +67,24 @@ struct HEADER {
 	bool list_done;
 
 };
-//End of Header
+enum stat {
+	Pause = 0, Play
+};
 
-void wavPlayer(char *fname);
+enum short_fmt {
+	PCM_8_mono = 0, PCM_8_stereo, PCM_16_mono, PCM_16_stereo
+};
+enum f_type {
+	unsupported = 0, wav, ogg
+};
+
+int player(char *fname);
+
+void checkExtension(char *fname);
+
+int getRate(void);
+
+void printINFO(void);
 
 void pullHeader(void);
 
@@ -86,20 +96,22 @@ void pullListChunk(void);
 
 bool checkHeader(void);
 
-void printSimpifyFormat(void);
-
-void printHeader(void);
-
-void TIM_reINIT(uint16_t psc, uint16_t arr);
-
-void DMA_reINIT(void);
+void closefile(void);
 
 void pullData(void);
 
-void rearrData(void);
+void dataProcess(void);
 
 void Start_DMA(void);
 
-void closefile(void);
+void TIM_reINIT(uint16_t sampleRate);
 
-#endif /* SRC_EXTRA_WAV_H_ */
+bool End(void);
+
+int getStatus();
+
+void player_play();
+
+void player_pause();
+
+#endif /* SRC_PLAYER_PLAYER_H_ */

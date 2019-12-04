@@ -30,11 +30,12 @@
 #include "Trace.h"
 
 #include "stdbool.h"
-#include "wav.c"
 #include "UI.c"
 #include "lcd.h"
 #include "DIR.h"
 #include "bsp_xpt2046_lcd.c"
+
+#include "player.h"
 
 /* USER CODE END Includes */
 
@@ -69,6 +70,7 @@ SRAM_HandleTypeDef hsram1;
 
 /* USER CODE BEGIN PV */
 char path[512];
+
 char currentList[20][_MAX_LFN];
 strType_XPT2046_Coordinate TP_Coordinate;
 /* USER CODE END PV */
@@ -147,11 +149,11 @@ int main(void) {
 	if (mount == 1) {
 		trace_printf("Finish Mount\n");
 		UI_INIT();
-
-//		wavPlayer(myfile);
-//		HAL_Delay(5000);
-//		dir_open("file_example");
-//		fileListUpdate();
+		//player("/Example_mono.ogg");
+//		oggPlayer("/Example.ogg");
+//		oggPlayer("/Example_mono.ogg");
+//		oggPlayer("/Example_mono_lowF.ogg");
+//		oggPlayer("/Rudolph_The_RedNosed_Reindeer.ogg");
 
 	} else {
 		trace_printf("Failed Mount\n");
@@ -180,17 +182,6 @@ int main(void) {
 		if (pin13) {
 			cursorDown();
 		}
-
-//		closefile();
-//		if (mount == 1) {
-//			mount = !(f_mount(NULL, SDPath, 1) == 0);
-//			if (mount == 0) {
-//				trace_printf("Finish Unmount\n");
-//			} else {
-//				trace_printf("Failed Unmount\n");
-//			}
-//		}
-
 		/* USER CODE END WHILE */
 
 		/* USER CODE BEGIN 3 */
