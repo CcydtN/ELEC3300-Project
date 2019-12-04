@@ -69,6 +69,7 @@ void oggPlayer(char *fname) {
 		trace_printf("ov_open:\t%d\n", temp);
 
 		info = ov_info(&vf, -1);
+		trace_printf("rate:\t%d\n", info->rate);
 		trace_printf("channels:\t%d\n", info->channels);
 
 		pullData();
@@ -131,19 +132,19 @@ void Start_DMA(void) {
 	 */
 	switch (info->channels) {
 	case 1:
-		HAL_DAC_Start_DMA(&hdac, DAC_CHANNEL_1, (uint32_t) output[pdata],
+		HAL_DAC_Start_DMA(&hdac, DAC_CHANNEL_1, (uint32_t*) output[pdata],
 				bytes_read / 2,
 				DAC_ALIGN_12B_L);
-		HAL_DAC_Start_DMA(&hdac, DAC_CHANNEL_2, (uint32_t) output[pdata],
+		HAL_DAC_Start_DMA(&hdac, DAC_CHANNEL_2, (uint32_t*) output[pdata],
 				bytes_read / 2,
 				DAC_ALIGN_12B_L);
 		break;
 	case 2:
-		HAL_DAC_Start_DMA(&hdac, DAC_CHANNEL_1, (uint32_t) output[pdata],
+		HAL_DAC_Start_DMA(&hdac, DAC_CHANNEL_1, (uint32_t*) output[pdata],
 				bytes_read / 4,
 				DAC_ALIGN_12B_L);
 		HAL_DAC_Start_DMA(&hdac, DAC_CHANNEL_2,
-				(uint32_t) &output[pdata][bytes_read / 4], bytes_read / 4,
+				(uint32_t*) &output[pdata][bytes_read / 4], bytes_read / 4,
 				DAC_ALIGN_12B_L);
 		break;
 	}

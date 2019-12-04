@@ -82,14 +82,17 @@ void UI_INIT(void) {
 }
 
 void fileListUpdate() {
+	char temp[28];
 	for (int i = 0; i <= 12; ++i) {
 		LCD_OpenWindow(0, 8 + 18 * i, 240, 16);
+		strncpy(temp, currentList[pageStart + i], 27);
+		strcat(temp, "\0");
 		if (i == cursor - pageStart) {
 			LCD_FillColor(240 * 16, BLACK);
-			LCD_DrawString_Reversed(8, 8 + i * 18, currentList[pageStart + i]);
+			LCD_DrawString_Reversed(8, 8 + i * 18, temp);
 		} else {
 			LCD_FillColor(240 * 16, WHITE);
-			LCD_DrawString(8, 8 + i * 18, currentList[pageStart + i]);
+			LCD_DrawString(8, 8 + i * 18, temp);
 		}
 	}
 }

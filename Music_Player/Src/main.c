@@ -147,7 +147,9 @@ int main(void) {
 		UI_INIT();
 		//oggPlayer("/Tone.ogg");
 		//oggPlayer("/Example.ogg");
-		oggPlayer("/Example_mono.ogg");
+		//oggPlayer("/Example_mono.ogg");
+		oggPlayer("/Example_mono_lowF.ogg");
+		//oggPlayer("/Rudolph_The_RedNosed_Reindeer.ogg");
 
 //		wavPlayer(myfile);
 //		HAL_Delay(5000);
