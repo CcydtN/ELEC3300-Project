@@ -7,9 +7,9 @@
 
 extern char path[512];
 extern char currentList[20][_MAX_LFN];
-extern char playingList[20][_MAX_LFN];
-extern char* playingPath;
-extern int playingCursor;
+char playingList[20][_MAX_LFN];
+char playingPath[512];
+int playingCursor;
 extern enum stat status;
 unsigned int cursor, pageStart, pageEnd;
 int count;
@@ -33,62 +33,60 @@ void UI_INIT(void) {
 void Update_Button(int status) {
 	uint8_t ucTemp, ucPage, ucColumn;
 
-    LCD_OpenWindow(62, 296, 16, 16);
+	LCD_OpenWindow(62, 296, 16, 16);
 	LCD_Write_Cmd( CMD_SetPixel);
-	if(cursor != 0){
-        for (ucPage = 0; ucPage < 32; ucPage++) {
-            ucTemp = icon[0][ucPage];
-            for (ucColumn = 0; ucColumn < 8; ucColumn++) {
-                if (ucTemp & 0x80)
-                    LCD_Write_Data(0xFFFF);
-                else
-                    LCD_Write_Data(0x001F);
-                ucTemp <<= 1;
-            }
-        }
-	}
-	else{
-	    for (ucPage = 0; ucPage < 32; ucPage++) {
-            ucTemp = icon[0][ucPage];
-            for (ucColumn = 0; ucColumn < 8; ucColumn++) {
-                if (ucTemp & 0x80)
-                    LCD_Write_Data(0xFFFF);
-                else
-                    LCD_Write_Data(0xF7DE);
-                ucTemp <<= 1;
-            }
-        }
+	if (cursor != 0) {
+		for (ucPage = 0; ucPage < 32; ucPage++) {
+			ucTemp = icon[0][ucPage];
+			for (ucColumn = 0; ucColumn < 8; ucColumn++) {
+				if (ucTemp & 0x80)
+					LCD_Write_Data(0xFFFF);
+				else
+					LCD_Write_Data(0x001F);
+				ucTemp <<= 1;
+			}
+		}
+	} else {
+		for (ucPage = 0; ucPage < 32; ucPage++) {
+			ucTemp = icon[0][ucPage];
+			for (ucColumn = 0; ucColumn < 8; ucColumn++) {
+				if (ucTemp & 0x80)
+					LCD_Write_Data(0xFFFF);
+				else
+					LCD_Write_Data(0xF7DE);
+				ucTemp <<= 1;
+			}
+		}
 	}
 	LCD_OpenWindow(162, 296, 16, 16);
 	LCD_Write_Cmd( CMD_SetPixel);
 	ucTemp = icon[3][ucPage];
-	if(cursor != count - 1){
-        for (ucColumn = 0; ucColumn < 8; ucColumn++) {
-            for (ucPage = 0; ucPage < 32; ucPage++) {
-                ucTemp = icon[3][ucPage];
-                for (ucColumn = 0; ucColumn < 8; ucColumn++) {
-                    if (ucTemp & 0x01)
-                        LCD_Write_Data(0xFFFF);
-                    else
-                        LCD_Write_Data(0x001F);
-                    ucTemp >>= 1;
-                }
-            }
-        }
-	}
-	else{
-        for (ucColumn = 0; ucColumn < 8; ucColumn++) {
-            for (ucPage = 0; ucPage < 32; ucPage++) {
-                ucTemp = icon[3][ucPage];
-                for (ucColumn = 0; ucColumn < 8; ucColumn++) {
-                    if (ucTemp & 0x01)
-                        LCD_Write_Data(0xFFFF);
-                    else
-                        LCD_Write_Data(0xF7DE);
-                    ucTemp >>= 1;
-                }
-            }
-        }
+	if (cursor != count - 1) {
+		for (ucColumn = 0; ucColumn < 8; ucColumn++) {
+			for (ucPage = 0; ucPage < 32; ucPage++) {
+				ucTemp = icon[3][ucPage];
+				for (ucColumn = 0; ucColumn < 8; ucColumn++) {
+					if (ucTemp & 0x01)
+						LCD_Write_Data(0xFFFF);
+					else
+						LCD_Write_Data(0x001F);
+					ucTemp >>= 1;
+				}
+			}
+		}
+	} else {
+		for (ucColumn = 0; ucColumn < 8; ucColumn++) {
+			for (ucPage = 0; ucPage < 32; ucPage++) {
+				ucTemp = icon[3][ucPage];
+				for (ucColumn = 0; ucColumn < 8; ucColumn++) {
+					if (ucTemp & 0x01)
+						LCD_Write_Data(0xFFFF);
+					else
+						LCD_Write_Data(0xF7DE);
+					ucTemp >>= 1;
+				}
+			}
+		}
 	}
 	LCD_OpenWindow(112, 296, 16, 16);
 	LCD_Write_Cmd( CMD_SetPixel);
@@ -164,7 +162,7 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
 			pageStart = 0;
 			pageEnd = (count < 12) ? count : 12;
 			fileListUpdate();
-			Update_Button();
+			Update_Button(status);
 		} else {
 			closefile();
 			char file[_MAX_LFN];
@@ -175,13 +173,13 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
 			trace_printf("%s\n", file);
 			wavPlayer(file);
 
-		    memcpy(playingList, currentList, 20*_MAX_LFN);
-			strcpy(playingPath, path)
+			memcpy(playingList, currentList, 20 * _MAX_LFN);
+			strcpy(playingPath, path);
 			playingCursor = cursor;
-			Update_Button();
+			Update_Button(status);
 
 			LCD_OpenWindow(0, 296, 61, 16);
-            LCD_FillColor(61 * 16, WHITE);
+			LCD_FillColor(61 * 16, WHITE);
 			LCD_OpenWindow(0, 278, 240, 16);
 			LCD_FillColor(240 * 16, WHITE);
 			LCD_DrawString(8, 278, currentList[cursor]);
