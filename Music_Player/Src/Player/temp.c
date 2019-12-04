@@ -86,7 +86,7 @@ void pullData(void) {
 }
 
 void rearrData(void) {
-	short int temp[bytes_read / 2];
+	unsigned short int temp[bytes_read / 2];
 	switch (info->channels) {
 	case 1:
 		for (int i = 0; i < bytes_read / 2; i++) {
@@ -130,16 +130,19 @@ void Start_DMA(void) {
 	 */
 	switch (info->channels) {
 	case 1:
-		HAL_DAC_Start_DMA(&hdac, DAC_CHANNEL_1, output[pdata], bytes_read / 2,
-		DAC_ALIGN_12B_L);
-		HAL_DAC_Start_DMA(&hdac, DAC_CHANNEL_2, output[pdata], bytes_read / 2,
-		DAC_ALIGN_12B_L);
+		HAL_DAC_Start_DMA(&hdac, DAC_CHANNEL_1, (uint32_t) output[pdata],
+				bytes_read / 2,
+				DAC_ALIGN_12B_L);
+		HAL_DAC_Start_DMA(&hdac, DAC_CHANNEL_2, (uint32_t) output[pdata],
+				bytes_read / 2,
+				DAC_ALIGN_12B_L);
 		break;
 	case 2:
-		HAL_DAC_Start_DMA(&hdac, DAC_CHANNEL_1, output[pdata], bytes_read / 4,
-		DAC_ALIGN_12B_L);
-		HAL_DAC_Start_DMA(&hdac, DAC_CHANNEL_2, &output[pdata][bytes_read / 4],
-				bytes_read / 4,
+		HAL_DAC_Start_DMA(&hdac, DAC_CHANNEL_1, (uint32_t) output[pdata],
+				bytes_read / 8,
+				DAC_ALIGN_12B_L);
+		HAL_DAC_Start_DMA(&hdac, DAC_CHANNEL_2,
+				(uint32_t) &output[pdata][bytes_read / 4], bytes_read / 8,
 				DAC_ALIGN_12B_L);
 		break;
 	}
