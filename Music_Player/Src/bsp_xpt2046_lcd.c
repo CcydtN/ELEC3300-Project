@@ -503,7 +503,7 @@ uint8_t XPT2046_Get_TouchedPoint(strType_XPT2046_Coordinate *pDisplayCoordinate,
 
 void Check_touchkey(void) {
 	strType_XPT2046_Coordinate strDisplayCoordinate;
-
+    trace_printf("FUCKING\n");
 	if (XPT2046_Get_TouchedPoint(&strDisplayCoordinate,
 			&strXPT2046_TouchPara)) {
 		if ((strDisplayCoordinate.y >= 296) && (strDisplayCoordinate.y < 312)) {
@@ -519,6 +519,7 @@ void Check_touchkey(void) {
 					HAL_TIM_Base_Stop(&htim2);
 					status = Pause;
 				}
+				trace_printf("End Fucking\n");
 				Update_Button(Status);
 				trace_printf("Play/Pause");
 

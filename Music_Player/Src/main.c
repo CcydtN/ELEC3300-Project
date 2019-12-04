@@ -165,6 +165,7 @@ int main(void) {
 
 	while (1) {
 		if (XPT2046_Get_TouchedPoint(&TP_Coordinate, &strXPT2046_TouchPara)) {
+		    trace_printf("START TO FUCK\n");
 			Check_touchkey();
 		}
 		int K1 = HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_0);
