@@ -58,31 +58,7 @@ void UI_INIT(void) {
 			ucTemp <<= 1;
 		}
 	}
-	LCD_OpenWindow(112, 296, 16, 16);
-	LCD_Write_Cmd( CMD_SetPixel);
-	if (status == Pause) {
-		for (ucPage = 0; ucPage < 32; ucPage++) {
-			ucTemp = icon[1][ucPage];
-			for (ucColumn = 0; ucColumn < 8; ucColumn++) {
-				if (ucTemp & 0x80)
-					LCD_Write_Data(0xFFFF);
-				else
-					LCD_Write_Data(0x001F);
-				ucTemp <<= 1;
-			}
-		}
-	} else if (status == Play) {
-		for (ucPage = 0; ucPage < 32; ucPage++) {
-			ucTemp = icon[2][ucPage];
-			for (ucColumn = 0; ucColumn < 8; ucColumn++) {
-				if (ucTemp & 0x80)
-					LCD_Write_Data(0xFFFF);
-				else
-					LCD_Write_Data(0x001F);
-				ucTemp <<= 1;
-			}
-		}
-	}
+	Update_Button(Status);
 	LCD_OpenWindow(162, 296, 16, 16);
 	LCD_Write_Cmd( CMD_SetPixel);
 	ucTemp = icon[3][ucPage];
@@ -99,6 +75,34 @@ void UI_INIT(void) {
 			}
 		}
 	}
+}
+
+void Update_Button(int status){
+    LCD_OpenWindow(112, 296, 16, 16);
+    	LCD_Write_Cmd( CMD_SetPixel);
+    	if (status == Pause) {
+    		for (ucPage = 0; ucPage < 32; ucPage++) {
+    			ucTemp = icon[1][ucPage];
+    			for (ucColumn = 0; ucColumn < 8; ucColumn++) {
+    				if (ucTemp & 0x80)
+    					LCD_Write_Data(0xFFFF);
+    				else
+    					LCD_Write_Data(0x001F);
+    				ucTemp <<= 1;
+    			}
+    		}
+    	} else if (status == Play) {
+    		for (ucPage = 0; ucPage < 32; ucPage++) {
+    			ucTemp = icon[2][ucPage];
+    			for (ucColumn = 0; ucColumn < 8; ucColumn++) {
+    				if (ucTemp & 0x80)
+    					LCD_Write_Data(0xFFFF);
+    				else
+    					LCD_Write_Data(0x001F);
+    				ucTemp <<= 1;
+    			}
+    		}
+    	}
 }
 
 void fileListUpdate() {

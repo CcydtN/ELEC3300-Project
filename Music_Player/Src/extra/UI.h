@@ -3,6 +3,8 @@
 
 void UI_INIT(void);
 
+void Update_Button(int status);
+
 void fileListUpdate(void);
 
 void cursorUP(void);
