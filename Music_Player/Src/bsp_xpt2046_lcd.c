@@ -23,7 +23,7 @@ static uint8_t XPT2046_Calculate_CalibrationFactor(
 extern enum stat status;
 extern strType_XPT2046_Coordinate TP_Coordinate;
 extern char playingList[20][_MAX_LFN];
-extern char playingPath[512];
+extern char playingPath[256];
 extern int playingCursor;
 
 strType_XPT2046_TouchPara strXPT2046_TouchPara = //{ 0.085958, -0.001073, -4.979353, -0.001750, 0.065168, -13.318824 };
@@ -474,9 +474,9 @@ uint8_t XPT2046_Get_TouchedPoint(strType_XPT2046_Coordinate *pDisplayCoordinate,
 }
 
 void Check_touchkey(void) {
-	trace_printf("%d\t%d\n", TP_Coordinate.x, TP_Coordinate.y);
+//	trace_printf("%d\t%d\n", TP_Coordinate.x, TP_Coordinate.y);
 	if ((TP_Coordinate.y >= 280) && (TP_Coordinate.y < 320)) {
-		trace_printf("y OK\n");
+//		trace_printf("y OK\n");
 		if ((TP_Coordinate.x >= 55) && (TP_Coordinate.x < 85)) {
 			//next song
 			closefile();
@@ -486,7 +486,7 @@ void Check_touchkey(void) {
 				strcat(file, "/");
 			playingCursor -= 1;
 			strcat(file, playingList[cursor]);
-			trace_printf("%s\n", file);
+//			trace_printf("%s\n", file);
 			player(file);
 			fileListUpdate();
 			LCD_OpenWindow(0, 278, 240, 16);
@@ -500,9 +500,9 @@ void Check_touchkey(void) {
 			} else if (status == Play) {
 				player_pause();
 			}
-			trace_printf("End Fucking\n");
+//			trace_printf("End Fucking\n");
 			Update_Button(status);
-			trace_printf("Play/Pause\n");
+//			trace_printf("Play/Pause\n");
 
 		}
 
@@ -515,7 +515,7 @@ void Check_touchkey(void) {
 				strcat(file, "/");
 			playingCursor += 1;
 			strcat(file, playingList[playingCursor]);
-			trace_printf("%s\n", file);
+//			trace_printf("%s\n", file);
 			player(file);
 			fileListUpdate();
 			LCD_OpenWindow(0, 278, 240, 16);

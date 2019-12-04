@@ -68,8 +68,6 @@ Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_dac.c \
 Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_dac_ex.c \
 Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_adc.c \
 Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_adc_ex.c \
-Src/DebugPrint/Trace.c \
-Src/DebugPrint/trace_impl.c \
 Src/LCD/lcd.c \
 Src/extra/DIR.c \
 Src/Player/player.c \
@@ -85,6 +83,9 @@ Src/libs/tremor/mapping0.c \
 Src/libs/tremor/mdct.c \
 Src/libs/tremor/res012.c \
 Src/libs/tremor/vorbisfile.c
+
+#Src/DebugPrint/Trace.c \
+#Src/DebugPrint/trace_impl.c \
 
 # ASM sources
 ASM_SOURCES =  \

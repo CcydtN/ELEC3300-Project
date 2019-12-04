@@ -2,15 +2,15 @@
 #include "UI.h"
 #include "lcd.h"
 #include "string.h"
-#include "Trace.h"
+//#include "Trace.h"
 #include "ffconf.h"
 #include "player.h"
 
-char path[512];
+char path[256];
 
 char currentList[20][_MAX_LFN];
 char playingList[20][_MAX_LFN];
-char playingPath[512];
+char playingPath[256];
 int playingCursor;
 unsigned int cursor, pageStart, pageEnd;
 int count;
@@ -161,7 +161,7 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
 		int temp = dir_open(currentList[cursor]);
 		if (temp != -1) {
 			count = temp;
-			trace_printf("Num of list element:\t%d\n", count);
+//			trace_printf("Num of list element:\t%d\n", count);
 			cursor = 0;
 			pageStart = 0;
 			pageEnd = (count < 12) ? count : 12;

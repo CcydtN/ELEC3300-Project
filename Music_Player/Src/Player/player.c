@@ -3,8 +3,8 @@
 #include "ffconf.h"
 #include "fatfs.h"
 #include "string.h"
-#include "Trace.h"
 #include "math.h"
+#include "malloc.h"
 
 extern DAC_HandleTypeDef hdac;
 extern TIM_HandleTypeDef htim2;
@@ -15,7 +15,7 @@ enum f_type type;
 FIL pfile;
 UINT br;
 
-short int output[2][1024];
+short int output[2][512];
 
 //For ogg
 OggVorbis_File vf;
@@ -68,7 +68,7 @@ long alt_tell(void *datasource) {
 int player(char *fname) {
 	checkExtension(fname);
 	FRESULT res;
-	trace_printf("%s\n", fname);
+//	trace_printf("%s\n", fname);
 	res = f_open(&pfile, fname, FA_OPEN_EXISTING | FA_READ);
 	if (res == FR_OK && type != 0) {
 		pdata = 0;
@@ -96,7 +96,7 @@ int player(char *fname) {
 		} else {
 			return 1;
 		}
-		printINFO();
+//		printINFO();
 		TIM_reINIT(getRate());
 		HAL_ADC_Start_DMA(&hadc1, &adc, sizeof(adc));
 		pullData();
@@ -223,21 +223,21 @@ void pullListChunk(void) {
 bool checkHeader(void) {
 //check if the first four byte is equal to "RIFF"
 	if (strncmp(header.riff, "RIFF", 4) != 0) {
-		trace_printf("RIFF label wrong\n");
+//		trace_printf("RIFF label wrong\n");
 		return false;
 	}
 //check if that four byte is equal to "WAVE"
 	if (strncmp(header.wave, "WAVE", 4) != 0) {
-		trace_printf("WAVE label wrong\n");
+//		trace_printf("WAVE label wrong\n");
 		return false;
 	}
 	if (!(header.fmt_done && header.data_done)) {
-		trace_printf("missing format or data tag\n");
+//		trace_printf("missing format or data tag\n");
 		return false;
 	}
 //check if the format is PCM or not
 	if (header.format.type != 1) {
-		trace_printf("Not PCM\n");
+//		trace_printf("Not PCM\n");
 		return false;
 	}
 //check the bits_per_sample is 8 or 16 or more
@@ -249,13 +249,13 @@ bool checkHeader(void) {
 		s_fmt += 2;
 		break;
 	default:
-		trace_printf("bit/sample: %d\n", header.format.bits_per_sample);
+//		trace_printf("bit/sample: %d\n", header.format.bits_per_sample);
 		return false;
 	}
 	if ((header.format.channels == 1) || (header.format.channels == 2)) { //check if channels is 1 or 2 (mono or stereo)
 		s_fmt += header.format.channels - 1;
 	} else {
-		trace_printf("More than two channel");
+//		trace_printf("More than two channel");
 		return false;
 	}
 	return true;
@@ -271,7 +271,7 @@ void closefile(void) {
 	} else if (type == ogg) {
 		ov_clear(&vf);
 	}
-	trace_printf("File close\n");
+//	trace_printf("File close\n");
 }
 
 void pullData(void) {

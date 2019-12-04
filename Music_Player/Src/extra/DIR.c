@@ -2,8 +2,7 @@
 #include "ff.h"
 #include "ffconf.h"
 #include "string.h"
-#include "Trace.h"
-#include "stdlib.h"
+//#include "Trace.h"
 
 extern char path[512];
 extern char currentList[20][_MAX_LFN];
@@ -26,8 +25,8 @@ int getDirList(void) {
 	}
 	res = f_opendir(&dirs, path);
 	if (res == FR_OK) {
-		trace_printf("Opened Dir\n");
-		trace_printf("Current Path:\t%s\n", path);
+//		trace_printf("Opened Dir\n");
+//		trace_printf("Current Path:\t%s\n", path);
 
 		while (((res = f_readdir(&dirs, &Finfo)) == FR_OK) && Finfo.fname[0]) {
 #if _USE_LFN
