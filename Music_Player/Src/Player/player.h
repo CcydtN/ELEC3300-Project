@@ -23,9 +23,6 @@
 
 //For WAV
 
-enum short_fmt {
-	PCM_8_mono = 0, PCM_8_stereo, PCM_16_mono, PCM_16_stereo
-};
 // WAVE file header format
 struct FORMAT {
 	//"fmt "(with a space)
@@ -84,6 +81,9 @@ struct HEADER {
 
 };
 
+enum {
+	PCM_8_mono = 0, PCM_8_stereo, PCM_16_mono, PCM_16_stereo
+} short_fmt;
 enum {
 	unsupported = 0, wav, ogg
 } f_type;
