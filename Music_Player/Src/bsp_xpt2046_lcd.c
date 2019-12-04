@@ -2,6 +2,7 @@
 #include "lcd.h"
 #include <stdio.h>
 #include <string.h>
+#include "player.h"
 
 //static void                   XPT2046_EXTI_Config                   ( void );
 //static void                   XPT2046_EXTI_NVIC_Config              ( void );
@@ -486,20 +487,18 @@ void Check_touchkey(void) {
 			playingCursor -= 1;
 			strcat(file, playingList[cursor]);
 			trace_printf("%s\n", file);
-			wavPlayer(file);
-		    fileListUpdate();
-            LCD_OpenWindow(0, 278, 240, 16);
-            LCD_FillColor(240 * 16, WHITE);
-            LCD_DrawString(8, 278, playingList[playingCursor]);
+			player(file);
+			fileListUpdate();
+			LCD_OpenWindow(0, 278, 240, 16);
+			LCD_FillColor(240 * 16, WHITE);
+			LCD_DrawString(8, 278, playingList[playingCursor]);
 		}
 
 		else if ((TP_Coordinate.x >= 105) && (TP_Coordinate.x < 135)) {
-			if (status == Pause) {
-				HAL_TIM_Base_Start(&htim2);
-				status = Play;
+			if (getStatus()) {
+				player_play();
 			} else if (status == Play) {
-				HAL_TIM_Base_Stop(&htim2);
-				status = Pause;
+				player_pause();
 			}
 			trace_printf("End Fucking\n");
 			Update_Button(status);
@@ -517,11 +516,11 @@ void Check_touchkey(void) {
 			playingCursor += 1;
 			strcat(file, playingList[playingCursor]);
 			trace_printf("%s\n", file);
-			wavPlayer(file);
-		    fileListUpdate();
-            LCD_OpenWindow(0, 278, 240, 16);
-            LCD_FillColor(240 * 16, WHITE);
-            LCD_DrawString(8, 278, currentList[playingCursor]);
+			player(file);
+			fileListUpdate();
+			LCD_OpenWindow(0, 278, 240, 16);
+			LCD_FillColor(240 * 16, WHITE);
+			LCD_DrawString(8, 278, currentList[playingCursor]);
 		}
 	}
 }

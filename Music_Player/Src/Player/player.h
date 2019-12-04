@@ -108,4 +108,10 @@ void TIM_reINIT(uint16_t sampleRate);
 
 bool End(void);
 
+int getStatus();
+
+void player_play();
+
+void player_pause();
+
 #endif /* SRC_PLAYER_PLAYER_H_ */

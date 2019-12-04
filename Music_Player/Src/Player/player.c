@@ -373,8 +373,18 @@ int getTime() {
 
 }
 
-int getStatus {
+int getStatus(void) {
+	return status;
+}
 
+void player_play(void) {
+	HAL_TIM_Base_Start_IT(&htim2);
+	status = Play;
+}
+
+void player_pause(void) {
+	HAL_TIM_Base_Stop_IT(&htim2);
+	status = Pause;
 }
 
 void HAL_DAC_ConvCpltCallbackCh1(DAC_HandleTypeDef *hdac) {

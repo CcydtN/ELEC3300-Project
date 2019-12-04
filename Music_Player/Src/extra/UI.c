@@ -180,7 +180,7 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
 			playingCursor = cursor;
 			strcat(file, currentList[playingCursor]);
 			trace_printf("%s\n", file);
-			wavPlayer(file);
+			player(file);
 			status = Play;
 
 			memcpy(playingList, currentList, 20 * _MAX_LFN);
