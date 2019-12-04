@@ -53,7 +53,7 @@ void Update_Button(int status) {
 				if (ucTemp & 0x80)
 					LCD_Write_Data(0xFFFF);
 				else
-					LCD_Write_Data(0xF7DE);
+					LCD_Write_Data(0x5AEB);
 				ucTemp <<= 1;
 			}
 		}
@@ -82,7 +82,7 @@ void Update_Button(int status) {
 					if (ucTemp & 0x01)
 						LCD_Write_Data(0xFFFF);
 					else
-						LCD_Write_Data(0xF7DE);
+						LCD_Write_Data(0x5AEB);
 					ucTemp >>= 1;
 				}
 			}
