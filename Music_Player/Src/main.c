@@ -165,8 +165,9 @@ int main(void)
 	GPIO_PinState pin12, pin13;
 
 	while (1) {
-		if(XPT2046_Get_TouchedPoint(&TP_Coordinate,&strXPT2046_TouchPara))
+		if(XPT2046_Get_TouchedPoint(&TP_Coordinate,&strXPT2046_TouchPara)){
 			Check_touchkey();
+		}
 		int K1 = HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_0);
 		int K2 = HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_13);
 
