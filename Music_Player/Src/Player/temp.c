@@ -8,7 +8,7 @@ extern TIM_HandleTypeDef htim2;
 FIL pfile;
 UINT br;
 
-short int output[2][1024];
+short int output[2][2048];
 OggVorbis_File vf;
 int bitstream;
 ov_callbacks callbacks;
@@ -105,6 +105,7 @@ void rearrData(void) {
 
 void HAL_DAC_ConvCpltCallbackCh1(DAC_HandleTypeDef *hdac) {
 	HAL_TIM_Base_Stop(&htim2);
+	TIM_reINIT(36000000 / info->rate - 1, 1);
 	if (!f_eof(&pfile)) {
 		Start_DMA();
 		pullData();
@@ -139,10 +140,10 @@ void Start_DMA(void) {
 		break;
 	case 2:
 		HAL_DAC_Start_DMA(&hdac, DAC_CHANNEL_1, (uint32_t) output[pdata],
-				bytes_read / 8,
+				bytes_read / 4,
 				DAC_ALIGN_12B_L);
 		HAL_DAC_Start_DMA(&hdac, DAC_CHANNEL_2,
-				(uint32_t) &output[pdata][bytes_read / 4], bytes_read / 8,
+				(uint32_t) &output[pdata][bytes_read / 4], bytes_read / 4,
 				DAC_ALIGN_12B_L);
 		break;
 	}

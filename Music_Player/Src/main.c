@@ -146,7 +146,8 @@ int main(void) {
 		trace_printf("Finish Mount\n");
 		UI_INIT();
 		//oggPlayer("/Tone.ogg");
-		oggPlayer("/Example.ogg");
+		//oggPlayer("/Example.ogg");
+		oggPlayer("/Example_mono.ogg");
 
 //		wavPlayer(myfile);
 //		HAL_Delay(5000);
