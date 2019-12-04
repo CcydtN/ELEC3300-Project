@@ -483,10 +483,14 @@ void Check_touchkey(void) {
 			strcpy(file, path);
 			if (strcmp(path, "/") != 0)
 				strcat(file, "/");
-			strcat(file, currentList[cursor - 1]);
+			playingCursor -= 1;
+			strcat(file, playingList[cursor]);
 			trace_printf("%s\n", file);
 			wavPlayer(file);
 		    fileListUpdate();
+            LCD_OpenWindow(0, 278, 240, 16);
+            LCD_FillColor(240 * 16, WHITE);
+            LCD_DrawString(8, 278, playingList[playingCursor]);
 		}
 
 		else if ((TP_Coordinate.x >= 105) && (TP_Coordinate.x < 135)) {
@@ -510,10 +514,14 @@ void Check_touchkey(void) {
 			strcpy(file, path);
 			if (strcmp(path, "/") != 0)
 				strcat(file, "/");
-			strcat(file, currentList[cursor + 1]);
+			playingCursor += 1;
+			strcat(file, playingList[playingCursor]);
 			trace_printf("%s\n", file);
 			wavPlayer(file);
 		    fileListUpdate();
+            LCD_OpenWindow(0, 278, 240, 16);
+            LCD_FillColor(240 * 16, WHITE);
+            LCD_DrawString(8, 278, currentList[playingCursor]);
 		}
 	}
 }

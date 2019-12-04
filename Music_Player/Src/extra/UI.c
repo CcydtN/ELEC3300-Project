@@ -173,14 +173,14 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
 			strcpy(file, path);
 			if (strcmp(path, "/") != 0)
 				strcat(file, "/");
-			strcat(file, currentList[cursor]);
+			playingCursor = cursor;
+			strcat(file, currentList[playingCursor]);
 			trace_printf("%s\n", file);
 			wavPlayer(file);
 			status = Play;
 
 			memcpy(playingList, currentList, 20 * _MAX_LFN);
 			strcpy(playingPath, path);
-			playingCursor = cursor;
 			Update_Button(status);
 
 			LCD_OpenWindow(0, 296, 61, 16);
