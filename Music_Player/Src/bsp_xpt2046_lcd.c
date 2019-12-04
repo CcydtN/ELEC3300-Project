@@ -486,6 +486,7 @@ void Check_touchkey(void) {
 			strcat(file, currentList[cursor - 1]);
 			trace_printf("%s\n", file);
 			wavPlayer(file);
+		    fileListUpdate();
 		}
 
 		else if ((TP_Coordinate.x >= 105) && (TP_Coordinate.x < 135)) {
@@ -512,6 +513,7 @@ void Check_touchkey(void) {
 			strcat(file, currentList[cursor + 1]);
 			trace_printf("%s\n", file);
 			wavPlayer(file);
+		    fileListUpdate();
 		}
 	}
 }
