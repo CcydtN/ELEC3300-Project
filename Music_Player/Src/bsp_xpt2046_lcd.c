@@ -502,16 +502,17 @@ uint8_t XPT2046_Get_TouchedPoint(strType_XPT2046_Coordinate *pDisplayCoordinate,
 }
 
 void Check_touchkey(void) {
-	strType_XPT2046_Coordinate strDisplayCoordinate;
-	trace_printf("%d\t%d\n", strDisplayCoordinate.x, strDisplayCoordinate.y);
-	if (XPT2046_Get_TouchedPoint(&strDisplayCoordinate,
+	//strType_XPT2046_Coordinate strDisplayCoordinate;
+	strType_XPT2046_Coordinate TP_Coordinate;
+	trace_printf("%d\t%d\n", TP_Coordinate.x, TP_Coordinate.y);
+	if (XPT2046_Get_TouchedPoint(&TP_Coordinate,
 			&strXPT2046_TouchPara)) {
-		if ((strDisplayCoordinate.y >= 296) && (strDisplayCoordinate.y < 312)) {
-			if ((strDisplayCoordinate.x >= 62)
-					&& (strDisplayCoordinate.x < 78)) {
+		if ((TP_Coordinate.y >= 296) && (TP_Coordinate.y < 312)) {
+			if ((TP_Coordinate.x >= 62)
+					&& (TP_Coordinate.x < 78)) {
 				//Last song
-			} else if ((strDisplayCoordinate.x >= 112)
-					&& (strDisplayCoordinate.x < 128)) {
+			} else if ((TP_Coordinate.x >= 112)
+					&& (TP_Coordinate.x < 128)) {
 				if (status == Pause) {
 					HAL_TIM_Base_Start(&htim2);
 					status = Play;
@@ -523,8 +524,8 @@ void Check_touchkey(void) {
 				Update_Button(status);
 				trace_printf("Play/Pause");
 
-			} else if ((strDisplayCoordinate.x >= 162)
-					&& (strDisplayCoordinate.x < 178)) {
+			} else if ((TP_Coordinate.x >= 162)
+					&& (TP_Coordinate.x < 178)) {
 				//Next song
 			}
 		}
