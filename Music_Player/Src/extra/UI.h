@@ -3,7 +3,7 @@
 
 void UI_INIT(void);
 
-void Update_Button(int status);
+void Update_Button(int);
 
 void fileListUpdate(void);
 
