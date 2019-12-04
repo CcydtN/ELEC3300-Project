@@ -21,6 +21,9 @@ static uint8_t XPT2046_Calculate_CalibrationFactor(
 
 extern enum stat status;
 extern strType_XPT2046_Coordinate TP_Coordinate;
+extern char playingList[20][_MAX_LFN];
+extern char* playingPath;
+extern int playingCursor;
 
 strType_XPT2046_TouchPara strXPT2046_TouchPara = //{ 0.085958, -0.001073, -4.979353, -0.001750, 0.065168, -13.318824 };
 		{ 0.001030, 0.064188, -10.804098, -0.085584, 0.001420, 324.127036 };
@@ -470,15 +473,22 @@ uint8_t XPT2046_Get_TouchedPoint(strType_XPT2046_Coordinate *pDisplayCoordinate,
 }
 
 void Check_touchkey(void) {
-	//strType_XPT2046_Coordinate strDisplayCoordinate;
-
-//	if (XPT2046_Get_TouchedPoint(&TP_Coordinate, &strXPT2046_TouchPara)) {
 	trace_printf("%d\t%d\n", TP_Coordinate.x, TP_Coordinate.y);
-	if ((TP_Coordinate.y >= 296) && (TP_Coordinate.y < 312)) {
+	if ((TP_Coordinate.y >= 280) && (TP_Coordinate.y < 320)) {
 		trace_printf("y OK\n");
-		if ((TP_Coordinate.x >= 62) && (TP_Coordinate.x < 78)) {
-			//Last song
-		} else if ((TP_Coordinate.x >= 112) && (TP_Coordinate.x < 128)) {
+		if ((TP_Coordinate.x >= 55) && (TP_Coordinate.x < 85)) {
+		    //next song
+            closefile();
+            char file[_MAX_LFN];
+            strcpy(file, path);
+            if (strcmp(path, "/") != 0)
+                strcat(file, "/");
+            strcat(file, currentList[cursor-1]);
+            trace_printf("%s\n", file);
+            wavPlayer(file);
+		}
+
+		else if ((TP_Coordinate.x >= 105) && (TP_Coordinate.x < 135)) {
 			if (status == Pause) {
 				HAL_TIM_Base_Start(&htim2);
 				status = Play;
@@ -490,10 +500,19 @@ void Check_touchkey(void) {
 			Update_Button(status);
 			trace_printf("Play/Pause\n");
 
-		} else if ((TP_Coordinate.x >= 162) && (TP_Coordinate.x < 178)) {
+		}
+
+		else if ((TP_Coordinate.x >= 155) && (TP_Coordinate.x < 185)) {
 			//Next song
+			closefile();
+                char file[_MAX_LFN];
+                strcpy(file, path);
+                if (strcmp(path, "/") != 0)
+                    strcat(file, "/");
+                strcat(file, currentList[cursor+1]);
+                trace_printf("%s\n", file);
+                wavPlayer(file);
 		}
 	}
-//	}
 }
 
