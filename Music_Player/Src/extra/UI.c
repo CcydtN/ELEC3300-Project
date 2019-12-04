@@ -15,7 +15,7 @@ unsigned int cursor, pageStart, pageEnd;
 int count;
 
 void UI_INIT(void) {
-    status = Pause;
+	status = Pause;
 	LCD_INIT();
 	strcpy(path, "/");
 	count = getDirList();
@@ -117,18 +117,17 @@ void Update_Button(int status) {
 }
 
 void fileListUpdate() {
+	char temp[27];
 	for (int i = 0; i <= 12; ++i) {
 		LCD_OpenWindow(0, 8 + 18 * i, 240, 16);
+		strncpy(temp, currentList[pageStart + i], 26);
+		temp[27] = '\0';
 		if (i == cursor - pageStart) {
-		char [27] temp;
-		strncpy(temp, currentList[i]);
-		strcat(temp,'\0');
-
 			LCD_FillColor(240 * 16, BLACK);
-			LCD_DrawString_Reversed(8, 8 + i * 18, temp[pageStart + i]);
+			LCD_DrawString_Reversed(8, 8 + i * 18, temp);
 		} else {
 			LCD_FillColor(240 * 16, WHITE);
-			LCD_DrawString(8, 8 + i * 18, temp[pageStart + i]);
+			LCD_DrawString(8, 8 + i * 18, temp);
 		}
 	}
 }
@@ -177,7 +176,7 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
 			strcat(file, currentList[cursor]);
 			trace_printf("%s\n", file);
 			wavPlayer(file);
-			status = play;
+			status = Play;
 
 			memcpy(playingList, currentList, 20 * _MAX_LFN);
 			strcpy(playingPath, path);
