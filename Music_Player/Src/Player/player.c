@@ -101,7 +101,6 @@ void closefile(void) {
 	HAL_TIM_Base_Stop(&htim2);
 	if (type == wav) {
 		f_close(&pfile);
-
 	} else if (type == ogg) {
 
 	}
