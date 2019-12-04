@@ -24,6 +24,7 @@ vorbis_info *info;
 //For wav
 struct HEADER header;
 
+enum stat status;
 enum short_fmt s_fmt;
 int bytes_read, bytes_finish, temp, pdata;
 
@@ -86,6 +87,7 @@ int player(char *fname) {
 
 			info = ov_info(&vf, -1);
 			s_fmt = 1 + info->channels;
+
 			pullData();
 		} else {
 			return 1;
@@ -350,6 +352,7 @@ void TIM_reINIT(uint16_t sampleRate) {
 	htim2.Init.Prescaler = 36000000 / sampleRate - 1;
 	htim2.Init.Period = 1;
 	HAL_TIM_Base_Init(&htim2);
+
 }
 
 bool End(void) {
@@ -366,7 +369,11 @@ bool End(void) {
 	}
 }
 
-getTime() {
+int getTime() {
+
+}
+
+int getStatus {
 
 }
 

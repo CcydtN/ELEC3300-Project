@@ -33,6 +33,7 @@
 #include "UI.c"
 #include "lcd.h"
 #include "DIR.h"
+#include "bsp_xpt2046_lcd.c"
 
 #include "player.h"
 
@@ -69,7 +70,9 @@ SRAM_HandleTypeDef hsram1;
 
 /* USER CODE BEGIN PV */
 char path[512];
-char currentList[20][_MAX_LFN / 2];
+
+char currentList[20][_MAX_LFN];
+strType_XPT2046_Coordinate TP_Coordinate;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -163,7 +166,10 @@ int main(void) {
 	GPIO_PinState pin12, pin13;
 
 	while (1) {
-
+		if (XPT2046_Get_TouchedPoint(&TP_Coordinate, &strXPT2046_TouchPara)) {
+			trace_printf("START TO FUCK\n");
+			Check_touchkey();
+		}
 		int K1 = HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_0);
 		int K2 = HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_13);
 
@@ -404,11 +410,15 @@ static void MX_GPIO_Init(void) {
 	GPIO_InitTypeDef GPIO_InitStruct = { 0 };
 
 	/* GPIO Ports Clock Enable */
+	__HAL_RCC_GPIOE_CLK_ENABLE();
 	__HAL_RCC_GPIOC_CLK_ENABLE();
 	__HAL_RCC_GPIOA_CLK_ENABLE();
-	__HAL_RCC_GPIOE_CLK_ENABLE();
 	__HAL_RCC_GPIOB_CLK_ENABLE();
 	__HAL_RCC_GPIOD_CLK_ENABLE();
+
+	/*Configure GPIO pin Output Level */
+	HAL_GPIO_WritePin(GPIOE, GPIO_PIN_2 | GPIO_PIN_0 | LCD_RST_Pin,
+			GPIO_PIN_RESET);
 
 	/*Configure GPIO pin Output Level */
 	HAL_GPIO_WritePin(LCD_BL_GPIO_Port, LCD_BL_Pin, GPIO_PIN_RESET);
@@ -416,8 +426,24 @@ static void MX_GPIO_Init(void) {
 	/*Configure GPIO pin Output Level */
 	HAL_GPIO_WritePin(Test_LED_GPIO_Port, Test_LED_Pin, GPIO_PIN_RESET);
 
-	/*Configure GPIO pin Output Level */
-	HAL_GPIO_WritePin(LCD_RST_GPIO_Port, LCD_RST_Pin, GPIO_PIN_RESET);
+	/*Configure GPIO pins : PE2 PE0 LCD_RST_Pin */
+	GPIO_InitStruct.Pin = GPIO_PIN_2 | GPIO_PIN_0 | LCD_RST_Pin;
+	GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+	GPIO_InitStruct.Pull = GPIO_NOPULL;
+	GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
+	HAL_GPIO_Init(GPIOE, &GPIO_InitStruct);
+
+	/*Configure GPIO pin : PE3 */
+	GPIO_InitStruct.Pin = GPIO_PIN_3;
+	GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+	GPIO_InitStruct.Pull = GPIO_NOPULL;
+	HAL_GPIO_Init(GPIOE, &GPIO_InitStruct);
+
+	/*Configure GPIO pin : PE4 */
+	GPIO_InitStruct.Pin = GPIO_PIN_4;
+	GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
+	GPIO_InitStruct.Pull = GPIO_NOPULL;
+	HAL_GPIO_Init(GPIOE, &GPIO_InitStruct);
 
 	/*Configure GPIO pin : K2_Pin */
 	GPIO_InitStruct.Pin = K2_Pin;
@@ -456,13 +482,6 @@ static void MX_GPIO_Init(void) {
 	GPIO_InitStruct.Pull = GPIO_NOPULL;
 	GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
 	HAL_GPIO_Init(Test_LED_GPIO_Port, &GPIO_InitStruct);
-
-	/*Configure GPIO pin : LCD_RST_Pin */
-	GPIO_InitStruct.Pin = LCD_RST_Pin;
-	GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-	GPIO_InitStruct.Pull = GPIO_NOPULL;
-	GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
-	HAL_GPIO_Init(LCD_RST_GPIO_Port, &GPIO_InitStruct);
 
 	/* EXTI interrupt init*/
 	HAL_NVIC_SetPriority(EXTI15_10_IRQn, 1, 0);

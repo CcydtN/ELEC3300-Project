@@ -67,6 +67,9 @@ struct HEADER {
 	bool list_done;
 
 };
+enum stat {
+	Pause = 0, Play
+};
 
 enum short_fmt {
 	PCM_8_mono = 0, PCM_8_stereo, PCM_16_mono, PCM_16_stereo
