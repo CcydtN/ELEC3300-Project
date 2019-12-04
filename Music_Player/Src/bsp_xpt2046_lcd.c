@@ -19,7 +19,7 @@ static uint8_t XPT2046_Calculate_CalibrationFactor(
 		strType_XPT2046_Coordinate *pDisplayCoordinate,
 		strType_XPT2046_Coordinate *pScreenSample,
 		strType_XPT2046_Calibration *pCalibrationFactor);
-extern status;
+extern enum stat status;
 
 strType_XPT2046_TouchPara strXPT2046_TouchPara = //{ 0.085958, -0.001073, -4.979353, -0.001750, 0.065168, -13.318824 };
 		{ 0.001030, 0.064188, -10.804098, -0.085584, 0.001420, 324.127036 };
@@ -124,7 +124,7 @@ static uint8_t XPT2046_ReadAdc_Smooth_XY ( strType_XPT2046_Coordinate * pScreenC
 
 		ucCount ++;
 
-	} while ( ( macXPT2046_EXTI_Read() == macXPT2046_EXTI_ActiveLevel ) && ( ucCount < 9 ) ); 	//?嚙�?????????????TP_INT_IN?z???? ???? ucCount<9*/
+	} while ( ( macXPT2046_EXTI_Read() == macXPT2046_EXTI_ActiveLevel ) && ( ucCount < 9 ) ); 	//?��蕭?????????????TP_INT_IN?z???? ???? ucCount<9*/
 
 
 
@@ -503,7 +503,7 @@ uint8_t XPT2046_Get_TouchedPoint(strType_XPT2046_Coordinate *pDisplayCoordinate,
 
 void Check_touchkey(void) {
 	strType_XPT2046_Coordinate strDisplayCoordinate;
-    trace_printf("FUCKING\n");
+	trace_printf("%d\t%d\n", strDisplayCoordinate.x, strDisplayCoordinate.y);
 	if (XPT2046_Get_TouchedPoint(&strDisplayCoordinate,
 			&strXPT2046_TouchPara)) {
 		if ((strDisplayCoordinate.y >= 296) && (strDisplayCoordinate.y < 312)) {
@@ -520,7 +520,7 @@ void Check_touchkey(void) {
 					status = Pause;
 				}
 				trace_printf("End Fucking\n");
-				Update_Button(Status);
+				Update_Button(status);
 				trace_printf("Play/Pause");
 
 			} else if ((strDisplayCoordinate.x >= 162)

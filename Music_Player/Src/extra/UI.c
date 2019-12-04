@@ -24,26 +24,6 @@ void UI_INIT(void) {
 	LCD_DrawLine(20, 267, 220, 267, BLACK);
 	LCD_DrawLine(20, 268, 220, 268, BLACK);
 
-	const unsigned char icon[4][32] = { { 0xff, 0xff, 0xff, 0xff, 0xf3, 0xef,
-			0xf3, 0xcf, 0xf3, 0x8f, 0xf3, 0x0f, 0xf2, 0x0f, 0xf0, 0x0f, 0xf0,
-			0x0f, 0xf2, 0x0f, 0xf3, 0x0f, 0xf3, 0x8f, 0xf3, 0xcf, 0xf3, 0xef,
-			0xff, 0xff, 0xff, 0xff }, //LastSong
-
-			{ 0xff, 0xff, 0xff, 0xff, 0xf1, 0x8f, 0xf1, 0x8f, 0xf1, 0x8f, 0xf1,
-					0x8f, 0xf1, 0x8f, 0xf1, 0x8f, 0xf1, 0x8f, 0xf1, 0x8f, 0xf1,
-					0x8f, 0xf1, 0x8f, 0xf1, 0x8f, 0xf1, 0x8f, 0xff, 0xff, 0xff,
-					0xff }, //play
-
-			{ 0xff, 0xff, 0xf3, 0xff, 0xf1, 0xff, 0xf0, 0xff, 0xf0, 0x7f, 0xf0,
-					0x3f, 0xf0, 0x1f, 0xf0, 0x0f, 0xf0, 0x0f, 0xf0, 0x1f, 0xf0,
-					0x3f, 0xf0, 0x7f, 0xf0, 0xff, 0xf1, 0xff, 0xf3, 0xff, 0xff,
-					0xff }, // Pause
-
-			{ 0xff, 0xff, 0xff, 0xff, 0xef, 0xf3, 0xcf, 0xf3, 0x8f, 0xf3, 0x0f,
-					0xf3, 0x0f, 0x0f2, 0x0f, 0xf0, 0x0f, 0xf0, 0x0f, 0xf2, 0x0f,
-					0xf3, 0x8f, 0xf3, 0xcf, 0xf3, 0xef, 0xf3, 0xff, 0xff, 0xff,
-					0xff } }; //LastSong
-
 	uint8_t ucTemp, ucPage, ucColumn;
 
 	LCD_OpenWindow(62, 296, 16, 16);
@@ -58,7 +38,7 @@ void UI_INIT(void) {
 			ucTemp <<= 1;
 		}
 	}
-	Update_Button(Status);
+	Update_Button(status);
 	LCD_OpenWindow(162, 296, 16, 16);
 	LCD_Write_Cmd( CMD_SetPixel);
 	ucTemp = icon[3][ucPage];
@@ -77,32 +57,34 @@ void UI_INIT(void) {
 	}
 }
 
-void Update_Button(int status){
-    LCD_OpenWindow(112, 296, 16, 16);
-    	LCD_Write_Cmd( CMD_SetPixel);
-    	if (status == Pause) {
-    		for (ucPage = 0; ucPage < 32; ucPage++) {
-    			ucTemp = icon[1][ucPage];
-    			for (ucColumn = 0; ucColumn < 8; ucColumn++) {
-    				if (ucTemp & 0x80)
-    					LCD_Write_Data(0xFFFF);
-    				else
-    					LCD_Write_Data(0x001F);
-    				ucTemp <<= 1;
-    			}
-    		}
-    	} else if (status == Play) {
-    		for (ucPage = 0; ucPage < 32; ucPage++) {
-    			ucTemp = icon[2][ucPage];
-    			for (ucColumn = 0; ucColumn < 8; ucColumn++) {
-    				if (ucTemp & 0x80)
-    					LCD_Write_Data(0xFFFF);
-    				else
-    					LCD_Write_Data(0x001F);
-    				ucTemp <<= 1;
-    			}
-    		}
-    	}
+void Update_Button(int status) {
+	uint8_t ucTemp, ucPage, ucColumn;
+
+	LCD_OpenWindow(112, 296, 16, 16);
+	LCD_Write_Cmd( CMD_SetPixel);
+	if (status == Pause) {
+		for (ucPage = 0; ucPage < 32; ucPage++) {
+			ucTemp = icon[1][ucPage];
+			for (ucColumn = 0; ucColumn < 8; ucColumn++) {
+				if (ucTemp & 0x80)
+					LCD_Write_Data(0xFFFF);
+				else
+					LCD_Write_Data(0x001F);
+				ucTemp <<= 1;
+			}
+		}
+	} else if (status == Play) {
+		for (ucPage = 0; ucPage < 32; ucPage++) {
+			ucTemp = icon[2][ucPage];
+			for (ucColumn = 0; ucColumn < 8; ucColumn++) {
+				if (ucTemp & 0x80)
+					LCD_Write_Data(0xFFFF);
+				else
+					LCD_Write_Data(0x001F);
+				ucTemp <<= 1;
+			}
+		}
+	}
 }
 
 void fileListUpdate() {
