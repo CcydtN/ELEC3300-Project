@@ -120,6 +120,7 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Music_Player/Src/DebugPrint}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Music_Player/Src/Player}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Music_Player/Src/LCD}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Music_Player/Src/libs/tremor}&quot;"/>
 								</option>
 								<inputType id="ilg.gnuarmeclipse.managedbuild.cross.tool.c.compiler.input.812890172" superClass="ilg.gnuarmeclipse.managedbuild.cross.tool.c.compiler.input"/>
 							</tool>

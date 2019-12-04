@@ -68,7 +68,7 @@ SRAM_HandleTypeDef hsram1;
 
 /* USER CODE BEGIN PV */
 char path[512];
-char currentList[20][_MAX_LFN];
+char currentList[20][_MAX_LFN / 2];
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -145,6 +145,8 @@ int main(void) {
 	if (mount == 1) {
 		trace_printf("Finish Mount\n");
 		UI_INIT();
+		//oggPlayer("/Tone.ogg");
+		oggPlayer("/Example.ogg");
 
 //		wavPlayer(myfile);
 //		HAL_Delay(5000);

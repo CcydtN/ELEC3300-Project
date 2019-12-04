@@ -74,8 +74,6 @@ Src/LCD/lcd.c \
 Src/extra/DIR.c \
 
 
-
-
 # ASM sources
 ASM_SOURCES =  \
 startup_stm32f103xe.s \
@@ -128,7 +126,6 @@ C_DEFS =  \
 -DOS_USE_TRACE_SEMIHOSTING_STDOUT \
 -DOS_HAS_NO_CORE_DEBUG \
 
-
 # AS includes
 AS_INCLUDES = \
 
@@ -146,7 +143,7 @@ C_INCLUDES =  \
 -ISrc/Player \
 -ISrc/LCD \
 -ISrc/Player/ogg \
--IC:\cygwin64\usr\include \
+-ISrc/libs/tremor \
 
 # compile gcc flags
 ASFLAGS = $(MCU) $(AS_DEFS) $(AS_INCLUDES) $(OPT) -Wall -fdata-sections -ffunction-sections --gc-sections
@@ -169,8 +166,8 @@ CFLAGS += -MMD -MP -MF"$(@:%.o=%.d)"
 LDSCRIPT = STM32F103VETx_FLASH.ld
 
 # libraries
-LIBS = -lc -lm -lnosys -llibvorbisidec -libogg -libogg.dll -lcygogg-0
-LIBDIR = -LC:\Users\kenny\Documents\GitHub\elec3300\Music_Player\Src\libs\
+LIBS = -lc -lm -lnosys
+LIBDIR =
 LDFLAGS = $(MCU) -specs=nano.specs -T$(LDSCRIPT) $(LIBDIR) $(LIBS) -Wl,-Map=$(BUILD_DIR)/$(TARGET).map,--cref -Wl,--gc-sections
 
 # default action: build all

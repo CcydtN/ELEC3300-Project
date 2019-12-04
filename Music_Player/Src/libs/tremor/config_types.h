@@ -1,5 +1,3 @@
-#ifndef _OS_H
-#define _OS_H
 /********************************************************************
  *                                                                  *
  * THIS FILE IS PART OF THE OggVorbis 'TREMOR' CODEC SOURCE CODE.   *
@@ -16,49 +14,13 @@
  function: #ifdef jail to whip a few platforms into the UNIX ideal.
 
  ********************************************************************/
+#ifndef _OS_CVTYPES_H
+#define _OS_CVTYPES_H
 
-#include <math.h>
-#include <ogg/os_types.h>
+typedef long long ogg_int64_t;
+typedef int ogg_int32_t;
+typedef unsigned int ogg_uint32_t;
+typedef short ogg_int16_t;
+typedef unsigned short ogg_uint16_t;
 
-#ifndef _V_IFDEFJAIL_H_
-#  define _V_IFDEFJAIL_H_
-
-#  ifdef __GNUC__
-#    define STIN static __inline__
-#  elif _WIN32
-#    define STIN static __inline
-#  endif
-#else
-#  define STIN static
 #endif
-
-#ifndef M_PI
-#  define M_PI (3.1415926536f)
-#endif
-
-#ifdef _WIN32
-#  include <malloc.h>
-#  define rint(x)   (floor((x)+0.5f)) 
-#  define NO_FLOAT_MATH_LIB
-#  define FAST_HYPOT(a, b) sqrt((a)*(a) + (b)*(b))
-#  define LITTLE_ENDIAN 1
-#  define BYTE_ORDER LITTLE_ENDIAN
-#endif
-
-#ifdef HAVE_ALLOCA_H
-#  include <alloca.h>
-#endif
-
-#ifdef USE_MEMORY_H
-#  include <memory.h>
-#endif
-
-#ifndef min
-#  define min(x,y)  ((x)>(y)?(y):(x))
-#endif
-
-#ifndef max
-#  define max(x,y)  ((x)<(y)?(y):(x))
-#endif
-
-#endif /* _OS_H */

@@ -9,7 +9,7 @@
 #include "ffconf.h"
 
 extern char path[512];
-extern char currentList[20][_MAX_LFN];
+extern char currentList[20][_MAX_LFN / 2];
 unsigned int cursor, pageStart, pageEnd;
 int count;
 
@@ -135,7 +135,7 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
 			if (strcmp(path, "/") != 0)
 				strcat(file, "/");
 			strcat(file, currentList[cursor]);
-			trace_printf("%s\n", file);
+//			trace_printf("%s\n", file);
 //			wavPlayer(file);
 			oggPlayer(file);
 			LCD_OpenWindow(0, 278, 240, 16);
