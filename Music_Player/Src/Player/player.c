@@ -5,6 +5,9 @@
 #include "string.h"
 #include "Trace.h"
 
+extern DAC_HandleTypeDef hdac;
+extern TIM_HandleTypeDef htim2;
+
 enum f_type type;
 
 FIL pfile;
@@ -22,9 +25,7 @@ vorbis_info *info;
 struct HEADER header;
 
 enum short_fmt s_fmt;
-int bytes_read;
-int temp;
-int pdata = 0;
+int bytes_read, bytes_finish, temp, pdata;
 
 size_t alt_read(void *ptr, size_t size, size_t nmemb, void *datasource) {
 	if (!f_eof(&pfile)) {
@@ -61,16 +62,18 @@ long alt_tell(void *datasource) {
 
 int player(char *fname) {
 	checkExtension(fname);
+	trace_printf("%d\n", type);
 	FRESULT res;
 	res = f_open(&pfile, fname, FA_OPEN_EXISTING | FA_READ);
 	if (res == FR_OK && type != 0) {
+		pdata = 0;
 		s_fmt = 0;
+		bytes_finish = 0;
 		if (type == wav) {
 			pullHeader();
 			if (checkHeader()) {
 				TIM_reINIT(header.format.sample_rate);
 				f_lseek(&pfile, header.data.pStart);
-				WaveDataLength = header.data.size;
 			} else {
 				return 1;
 			}
@@ -99,10 +102,11 @@ int player(char *fname) {
 }
 
 void checkExtension(char *fname) {
-	char *temp = strrchr(fname, '.');
-	if (strncmp(temp, ".wav", 4)) {
+	char *ext = strrchr(fname, '.');
+	trace_printf("%s\n", ext);
+	if (strncmp(ext, ".wav", 4) == 0) {
 		type = wav;
-	} else if (strncmp(temp, ".ogg", 4)) {
+	} else if (strncmp(ext, ".ogg", 4) == 0) {
 		type = ogg;
 	} else {
 		type = unsupported;
@@ -260,31 +264,80 @@ void closefile(void) {
 }
 
 void pullData(void) {
-	bytes_read = ov_read(&vf, output[pdata], sizeof(output[pdata]), &bitstream);
+	if (type == wav) {
+		f_read(&pfile, output[pdata], sizeof(output[pdata]), &br);
+		bytes_read = br;
+	} else if (type == ogg) {
+		bytes_read = ov_read(&vf, output[pdata], sizeof(output[pdata]),
+				&bitstream);
+	}
 	dataProcess();
 }
 
 void dataProcess(void) {
-	unsigned short int temp[bytes_read / 2];
+	uint8_t *temp8;
+	unsigned short int *temp16;
 	switch (s_fmt) {
-	case 1:
+	case PCM_8_mono:
+		break;
+	case PCM_8_stereo:
+		temp8 = malloc(bytes_read);
+		for (int i = 0; i < bytes_read / 2; i++) {
+			temp8[i] = output[pdata][i];
+			temp8[i + bytes_read / 2] = output[pdata][i + 1];
+		}
+		memcpy(output[pdata], temp8, bytes_read);
+		break;
+	case PCM_16_mono:
 		for (int i = 0; i < bytes_read / 2; i++) {
 			output[pdata][i] ^= 0x8000;
 		}
 		break;
-	case 2:
+	case PCM_16_stereo:
+		temp16 = malloc(bytes_read);
 		for (int i = 0; i < bytes_read / 4; i++) {
-			temp[i] = output[pdata][2 * i] ^ 0x8000;
-			temp[i + bytes_read / 4] = output[pdata][2 * i + 1] ^ 0x8000;
+			temp16[i] = output[pdata][2 * i] ^ 0x8000;
+			temp16[i + bytes_read / 4] = output[pdata][2 * i + 1] ^ 0x8000;
 		}
-		memcpy(output[pdata], temp, bytes_read);
+		memcpy(output[pdata], temp16, bytes_read);
 		break;
 	}
 }
 
 void Start_DMA(void) {
 	switch (s_fmt) {
-
+	case PCM_8_mono:
+		HAL_DAC_Start_DMA(&hdac, DAC_CHANNEL_1, (uint32_t*) output[pdata],
+				bytes_read,
+				DAC_ALIGN_8B_R);
+		HAL_DAC_Start_DMA(&hdac, DAC_CHANNEL_2, (uint32_t*) output[pdata],
+				bytes_read,
+				DAC_ALIGN_8B_R);
+		break;
+	case PCM_8_stereo:
+		HAL_DAC_Start_DMA(&hdac, DAC_CHANNEL_1, (uint32_t*) output[pdata],
+				bytes_read / 2,
+				DAC_ALIGN_8B_R);
+		HAL_DAC_Start_DMA(&hdac, DAC_CHANNEL_2,
+				(uint32_t*) &(output[pdata][bytes_read / 2]), bytes_read / 2,
+				DAC_ALIGN_8B_R);
+		break;
+	case PCM_16_mono:
+		HAL_DAC_Start_DMA(&hdac, DAC_CHANNEL_1, (uint32_t*) output[pdata],
+				bytes_read / 2,
+				DAC_ALIGN_12B_L);
+		HAL_DAC_Start_DMA(&hdac, DAC_CHANNEL_2, (uint32_t*) output[pdata],
+				bytes_read / 2,
+				DAC_ALIGN_12B_L);
+		break;
+	case PCM_16_stereo:
+		HAL_DAC_Start_DMA(&hdac, DAC_CHANNEL_1, (uint32_t*) output[pdata],
+				bytes_read / 4,
+				DAC_ALIGN_12B_L);
+		HAL_DAC_Start_DMA(&hdac, DAC_CHANNEL_2,
+				(uint32_t*) &output[pdata][bytes_read / 4], bytes_read / 4,
+				DAC_ALIGN_12B_L);
+		break;
 	}
 	HAL_TIM_Base_Start(&htim2);
 	pdata = pdata ^ 0x01;
@@ -299,8 +352,22 @@ void TIM_reINIT(uint16_t sampleRate) {
 	HAL_TIM_Base_Init(&htim2);
 }
 
-bool End() {
-	return 0;
+bool End(void) {
+	if (type == wav) {
+		if (bytes_finish > header.data.size) {
+			return 1;
+		} else {
+			bytes_finish += bytes_read;
+		}
+	} else if (type == ogg) {
+		return f_eof(&pfile);
+	} else {
+		return 0;
+	}
+}
+
+getTime() {
+
 }
 
 void HAL_DAC_ConvCpltCallbackCh1(DAC_HandleTypeDef *hdac) {

@@ -129,15 +129,13 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
 			pageEnd = (count < 12) ? count : 12;
 			fileListUpdate();
 		} else {
-			//closefile();
+			closefile();
 			char file[_MAX_LFN];
 			strcpy(file, path);
 			if (strcmp(path, "/") != 0)
 				strcat(file, "/");
 			strcat(file, currentList[cursor]);
-//			trace_printf("%s\n", file);
-//			wavPlayer(file);
-//			oggPlayer(file);
+			player(file);
 			LCD_OpenWindow(0, 278, 240, 16);
 			LCD_FillColor(240 * 16, WHITE);
 			LCD_DrawString(8, 278, currentList[cursor]);

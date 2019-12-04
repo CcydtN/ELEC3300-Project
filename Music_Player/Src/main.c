@@ -34,6 +34,8 @@
 #include "lcd.h"
 #include "DIR.h"
 
+#include "player.h"
+
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -144,16 +146,11 @@ int main(void) {
 	if (mount == 1) {
 		trace_printf("Finish Mount\n");
 		UI_INIT();
-		//oggPlayer("/Tone.ogg");
-		//oggPlayer("/Example.ogg");
-		//oggPlayer("/Example_mono.ogg");
-		//oggPlayer("/Example_mono_lowF.ogg");
-		//oggPlayer("/Rudolph_The_RedNosed_Reindeer.ogg");
-
-//		wavPlayer(myfile);
-//		HAL_Delay(5000);
-//		dir_open("file_example");
-//		fileListUpdate();
+		//player("/Example_mono.ogg");
+//		oggPlayer("/Example.ogg");
+//		oggPlayer("/Example_mono.ogg");
+//		oggPlayer("/Example_mono_lowF.ogg");
+//		oggPlayer("/Rudolph_The_RedNosed_Reindeer.ogg");
 
 	} else {
 		trace_printf("Failed Mount\n");
@@ -179,17 +176,6 @@ int main(void) {
 		if (pin13) {
 			cursorDown();
 		}
-
-//		closefile();
-//		if (mount == 1) {
-//			mount = !(f_mount(NULL, SDPath, 1) == 0);
-//			if (mount == 0) {
-//				trace_printf("Finish Unmount\n");
-//			} else {
-//				trace_printf("Failed Unmount\n");
-//			}
-//		}
-
 		/* USER CODE END WHILE */
 
 		/* USER CODE BEGIN 3 */

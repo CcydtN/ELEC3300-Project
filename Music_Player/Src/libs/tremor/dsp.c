@@ -174,6 +174,17 @@ long vorbis_packet_blocksize(vorbis_info *vi, ogg_packet *op) {
 	return (ci->blocksizes[ci->mode_param[mode].blockflag]);
 }
 
+static int ilog(ogg_uint32_t v) {
+	int ret = 0;
+	if (v)
+		--v;
+	while (v) {
+		ret++;
+		v >>= 1;
+	}
+	return (ret);
+}
+
 int vorbis_dsp_synthesis(vorbis_dsp_state *vd, ogg_packet *op, int decodep) {
 	vorbis_info *vi = vd->vi;
 	codec_setup_info *ci = (codec_setup_info*) vi->codec_setup;

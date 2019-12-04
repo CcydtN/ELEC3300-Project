@@ -8,19 +8,6 @@
 #include "ivorbiscodec.h"
 #include "ivorbisfile.h"
 
-#include "vorbisfile.c"
-#include "info.c"
-#include "framing.c"
-#include "bitwise.c"
-#include "mapping0.c"
-#include "floor0.c"
-#include "floor1.c"
-#include "codebook.c"
-#include "res012.c"
-#include "dsp.c"
-#include "floor_lookup.c"
-#include "mdct.c"
-
 //For WAV
 
 // WAVE file header format
@@ -49,7 +36,7 @@ struct DATA {
 	//total size of data = NumSamples* NumChannels*BitPerSample/8
 	unsigned int size;
 	//Start pointer, for data reading in later
-	DWORD pStart;
+	unsigned long pStart;
 };
 
 struct LIST {
@@ -81,13 +68,41 @@ struct HEADER {
 
 };
 
-enum {
+enum short_fmt {
 	PCM_8_mono = 0, PCM_8_stereo, PCM_16_mono, PCM_16_stereo
-} short_fmt;
-enum {
+};
+enum f_type {
 	unsupported = 0, wav, ogg
-} f_type;
+};
 
-void player(char *fname);
+int player(char *fname);
+
+void checkExtension(char *fname);
+
+int getRate(void);
+
+void printINFO(void);
+
+void pullHeader(void);
+
+void pullFormatChunk(void);
+
+void pullDataChunk(void);
+
+void pullListChunk(void);
+
+bool checkHeader(void);
+
+void closefile(void);
+
+void pullData(void);
+
+void dataProcess(void);
+
+void Start_DMA(void);
+
+void TIM_reINIT(uint16_t sampleRate);
+
+bool End(void);
 
 #endif /* SRC_PLAYER_PLAYER_H_ */

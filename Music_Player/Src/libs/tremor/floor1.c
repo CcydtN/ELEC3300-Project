@@ -50,6 +50,15 @@ void floor1_free_info(vorbis_info_floor *i) {
 	}
 }
 
+static int ilog(unsigned int v) {
+	int ret = 0;
+	while (v) {
+		ret++;
+		v >>= 1;
+	}
+	return (ret);
+}
+
 static void vorbis_mergesort(char *index, ogg_uint16_t *vals, ogg_uint16_t n) {
 	ogg_uint16_t i, j;
 	char *temp, *A = index, *B = _ogg_malloc(n * sizeof(*B));

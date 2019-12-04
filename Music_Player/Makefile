@@ -72,7 +72,19 @@ Src/DebugPrint/Trace.c \
 Src/DebugPrint/trace_impl.c \
 Src/LCD/lcd.c \
 Src/extra/DIR.c \
-
+Src/Player/player.c \
+Src/libs/tremor/bitwise.c \
+Src/libs/tremor/codebook.c \
+Src/libs/tremor/dsp.c \
+Src/libs/tremor/framing.c \
+Src/libs/tremor/floor0.c \
+Src/libs/tremor/floor1.c \
+Src/libs/tremor/floor_lookup.c \
+Src/libs/tremor/info.c \
+Src/libs/tremor/mapping0.c \
+Src/libs/tremor/mdct.c \
+Src/libs/tremor/res012.c \
+Src/libs/tremor/vorbisfile.c \
 
 # ASM sources
 ASM_SOURCES =  \
