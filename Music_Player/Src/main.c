@@ -34,7 +34,6 @@
 #include "lcd.h"
 #include "DIR.h"
 
-#include "temp.c"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -148,7 +147,7 @@ int main(void) {
 		//oggPlayer("/Tone.ogg");
 		//oggPlayer("/Example.ogg");
 		//oggPlayer("/Example_mono.ogg");
-		oggPlayer("/Example_mono_lowF.ogg");
+		//oggPlayer("/Example_mono_lowF.ogg");
 		//oggPlayer("/Rudolph_The_RedNosed_Reindeer.ogg");
 
 //		wavPlayer(myfile);

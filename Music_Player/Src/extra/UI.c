@@ -1,11 +1,8 @@
 #include <DIR.h>
-#include <temp.h>
 #include "UI.h"
 #include "lcd.h"
 #include "string.h"
 #include "Trace.h"
-//#include "wav.h"
-#include "temp.h"
 #include "ffconf.h"
 
 extern char path[512];
@@ -140,7 +137,7 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
 			strcat(file, currentList[cursor]);
 //			trace_printf("%s\n", file);
 //			wavPlayer(file);
-			oggPlayer(file);
+//			oggPlayer(file);
 			LCD_OpenWindow(0, 278, 240, 16);
 			LCD_FillColor(240 * 16, WHITE);
 			LCD_DrawString(8, 278, currentList[cursor]);
