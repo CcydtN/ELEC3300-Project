@@ -56,7 +56,6 @@ int getDirList(void) {
 
 int dir_open(char *pName) {
 	FRESULT res = f_chdir(pName);
-	trace_printf("%d\n", res);
 	if (res == FR_OK) {
 		f_getcwd(path, _MAX_LFN);
 		return getDirList();

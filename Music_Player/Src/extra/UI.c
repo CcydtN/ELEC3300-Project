@@ -6,9 +6,9 @@
 #include "ffconf.h"
 #include "player.h"
 
-extern char path[512];
+char path[512];
 
-extern char currentList[20][_MAX_LFN];
+char currentList[20][_MAX_LFN];
 char playingList[20][_MAX_LFN];
 char playingPath[512];
 int playingCursor;
@@ -161,7 +161,7 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
 		int temp = dir_open(currentList[cursor]);
 		if (temp != -1) {
 			count = temp;
-			trace_printf("%d\n", count);
+			trace_printf("Num of list element:\t%d\n", count);
 			cursor = 0;
 			pageStart = 0;
 			pageEnd = (count < 12) ? count : 12;
@@ -176,6 +176,7 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
 
 			playingCursor = cursor;
 			strcat(file, currentList[playingCursor]);
+
 			player(file);
 			setStatus(1);
 

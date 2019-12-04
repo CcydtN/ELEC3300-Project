@@ -4,9 +4,11 @@
 #include "fatfs.h"
 #include "string.h"
 #include "Trace.h"
+#include "math.h"
 
 extern DAC_HandleTypeDef hdac;
 extern TIM_HandleTypeDef htim2;
+extern ADC_HandleTypeDef hadc1;
 
 enum f_type type;
 
@@ -24,13 +26,15 @@ vorbis_info *info;
 //For wav
 struct HEADER header;
 
+int adc;
+
 enum stat status = 0;
 enum short_fmt s_fmt;
-int bytes_read, bytes_finish, temp, pdata;
+int bytes_read, bytes_finish, pdata;
 
 size_t alt_read(void *ptr, size_t size, size_t nmemb, void *datasource) {
 	if (!f_eof(&pfile)) {
-		f_read(&pfile, ptr, size * nmemb, &br);
+		f_read(datasource, ptr, size * nmemb, &br);
 		return br;
 	} else
 		return 0;
@@ -83,8 +87,9 @@ int player(char *fname) {
 			callbacks.seek_func = alt_seek;
 			callbacks.close_func = alt_close;
 			callbacks.tell_func = alt_tell;
-			ov_open_callbacks(&pfile, &vf, NULL, 0, callbacks);
-			//trace_printf("ogg opened");
+
+			int oggres = ov_open_callbacks(&pfile, &vf, NULL, 0, callbacks);
+			//trace_printf("OGG opened\t%d\n", oggres);
 			info = ov_info(&vf, -1);
 			s_fmt = 1 + info->channels;
 			pullData();
@@ -93,7 +98,9 @@ int player(char *fname) {
 		}
 		printINFO();
 		TIM_reINIT(getRate());
+		HAL_ADC_Start_DMA(&hadc1, &adc, sizeof(adc));
 		pullData();
+		//trace_printf("lol");
 		Start_DMA();
 		pullData();
 	} else {
@@ -104,7 +111,6 @@ int player(char *fname) {
 
 void checkExtension(char *fname) {
 	char *ext = strrchr(fname, '.');
-	trace_printf("%s\n", ext);
 	if (strncmp(ext, ".wav", 4) == 0) {
 		type = wav;
 	} else if (strncmp(ext, ".ogg", 4) == 0) {
@@ -120,6 +126,7 @@ long getRate(void) {
 	} else if (type == ogg) {
 		return info->rate;
 	}
+	return info->rate;
 }
 
 void printINFO(void) {
@@ -128,6 +135,7 @@ void printINFO(void) {
 	} else if (type == ogg) {
 		trace_printf("OGG\n");
 	}
+	trace_printf("Sample rate:\t%d\n", getRate());
 	switch (s_fmt) {
 	case PCM_8_mono:
 		trace_printf("8-bits Mono PCM\n");
@@ -256,12 +264,14 @@ bool checkHeader(void) {
 void closefile(void) {
 	HAL_DAC_Stop_DMA(&hdac, DAC_CHANNEL_1);
 	HAL_DAC_Stop_DMA(&hdac, DAC_CHANNEL_2);
+	HAL_ADC_Stop_DMA(&hadc1);
 	HAL_TIM_Base_Stop(&htim2);
 	if (type == wav) {
 		f_close(&pfile);
 	} else if (type == ogg) {
 		ov_clear(&vf);
 	}
+	trace_printf("File close\n");
 }
 
 void pullData(void) {
@@ -282,36 +292,43 @@ void pullData(void) {
 void dataProcess(void) {
 	uint8_t *temp8;
 	unsigned short int *temp16;
+	temp16 = calloc(bytes_read, sizeof(unsigned short int));
 	switch (s_fmt) {
 	case PCM_8_mono:
 		temp8 = output[pdata];
-		temp16 = calloc(bytes_read, sizeof(unsigned short int));
 		for (int i = 0; i < bytes_read; i++) {
-			temp16[i] = (unsigned short int) temp8[i];
+			temp16[i] = temp8[i];
+			temp16[i] = (temp16[i] * adc / 4096);
 		}
 		memcpy(output[pdata], temp16, 2 * bytes_read);
 		break;
 	case PCM_8_stereo:
 		temp8 = output[pdata];
-		temp16 = calloc(bytes_read, sizeof(unsigned short int));
 		for (int i = 0; i < bytes_read / 2; i++) {
-			temp16[i] = (unsigned short int) temp8[i];
-			temp16[i + bytes_read / 2] = (unsigned short int) temp8[i + 1];
+			temp16[i] = temp8[2 * i];
+			temp16[i + bytes_read / 2] = temp8[2 * i + 1];
+			temp16[i] = (temp16[i] * adc / 4096);
+			temp16[i + bytes_read / 2] = (temp16[i + bytes_read / 2] * adc
+					/ 4096);
+
 		}
 		memcpy(output[pdata], temp16, 2 * bytes_read);
 		break;
 	case PCM_16_mono:
-		temp16 = calloc(bytes_read, sizeof(unsigned short int));
 		for (int i = 0; i < bytes_read / 2; i++) {
 			temp16[i] = output[pdata][i] ^ 0x8000;
+			temp16[i] = (temp16[i] * adc / 4096);
 		}
 		memcpy(output[pdata], temp16, bytes_read);
 		break;
 	case PCM_16_stereo:
-		temp16 = calloc(bytes_read, sizeof(unsigned short int));
 		for (int i = 0; i < bytes_read / 4; i++) {
-			temp16[i] = output[pdata][2 * i] ^ 0x8000;
-			temp16[i + bytes_read / 4] = output[pdata][2 * i + 1] ^ 0x8000;
+			temp16[i] = (output[pdata][2 * i] ^ 0x8000);
+			temp16[i + bytes_read / 4] = (output[pdata][2 * i + 1] ^ 0x8000);
+			temp16[i] = (temp16[i] * adc / 4096);
+			temp16[i + bytes_read / 4] = (temp16[i + bytes_read / 4] * adc
+					/ 4096);
+
 		}
 		memcpy(output[pdata], temp16, bytes_read);
 		break;
@@ -331,10 +348,10 @@ void Start_DMA(void) {
 		break;
 	case PCM_8_stereo:
 		HAL_DAC_Start_DMA(&hdac, DAC_CHANNEL_1, (uint32_t*) output[pdata],
-				bytes_read,
+				bytes_read / 2,
 				DAC_ALIGN_8B_R);
 		HAL_DAC_Start_DMA(&hdac, DAC_CHANNEL_2,
-				(uint32_t*) &(output[pdata][bytes_read / 2]), bytes_read,
+				(uint32_t*) &(output[pdata][bytes_read / 2]), bytes_read / 2,
 				DAC_ALIGN_8B_R);
 		break;
 	case PCM_16_mono:
@@ -413,5 +430,7 @@ void HAL_DAC_ConvCpltCallbackCh1(DAC_HandleTypeDef *hdac) {
 	if (!End()) {
 		Start_DMA();
 		pullData();
+	} else {
+		closefile();
 	}
 }
