@@ -7,23 +7,27 @@
 //static void                   XPT2046_EXTI_NVIC_Config              ( void );
 //static void                   XPT2046_GPIO_SPI_Config               ( void );
 
-static void                   XPT2046_DelayUS                       ( __IO uint32_t ulCount );
-static void                   XPT2046_WriteCMD                      ( uint8_t ucCmd );
-static uint16_t               XPT2046_ReadCMD                       ( void );
-static uint16_t               XPT2046_ReadAdc                       ( uint8_t ucChannel );
-static void                   XPT2046_ReadAdc_XY                    ( int16_t * sX_Ad, int16_t * sY_Ad );
-static uint8_t                XPT2046_ReadAdc_Smooth_XY             ( strType_XPT2046_Coordinate * pScreenCoordinate );
-static uint8_t                XPT2046_Calculate_CalibrationFactor   ( strType_XPT2046_Coordinate * pDisplayCoordinate, strType_XPT2046_Coordinate * pScreenSample, strType_XPT2046_Calibration * pCalibrationFactor );
+static void XPT2046_DelayUS( __IO uint32_t ulCount);
+static void XPT2046_WriteCMD(uint8_t ucCmd);
+static uint16_t XPT2046_ReadCMD(void);
+static uint16_t XPT2046_ReadAdc(uint8_t ucChannel);
+static void XPT2046_ReadAdc_XY(int16_t *sX_Ad, int16_t *sY_Ad);
+static uint8_t XPT2046_ReadAdc_Smooth_XY(
+		strType_XPT2046_Coordinate *pScreenCoordinate);
+static uint8_t XPT2046_Calculate_CalibrationFactor(
+		strType_XPT2046_Coordinate *pDisplayCoordinate,
+		strType_XPT2046_Coordinate *pScreenSample,
+		strType_XPT2046_Calibration *pCalibrationFactor);
 
 extern enum stat status;
+extern strType_XPT2046_Coordinate TP_Coordinate;
 
 strType_XPT2046_TouchPara strXPT2046_TouchPara = //{ 0.085958, -0.001073, -4.979353, -0.001750, 0.065168, -13.318824 };
-                                               { 0.001030, 0.064188, -10.804098, -0.085584, 0.001420, 324.127036 };
+		{ 0.001030, 0.064188, -10.804098, -0.085584, 0.001420, 324.127036 };
 
 volatile uint8_t ucXPT2046_TouchFlag = 0;
 
-static void XPT2046_DelayUS ( __IO uint32_t ulCount )
-{
+static void XPT2046_DelayUS( __IO uint32_t ulCount) {
 	uint32_t i;
 
 	for (i = 0; i < ulCount; i++) {
@@ -77,13 +81,11 @@ static uint16_t XPT2046_ReadCMD(void) {
 	return usBuf;
 }
 
-
 static uint16_t XPT2046_ReadAdc(uint8_t ucChannel) {
 	XPT2046_WriteCMD(ucChannel);
 
 	return XPT2046_ReadCMD();
 }
-
 
 static void XPT2046_ReadAdc_XY(int16_t *sX_Ad, int16_t *sY_Ad) {
 	int16_t sX_Ad_Temp, sY_Ad_Temp;
@@ -118,7 +120,7 @@ static uint8_t XPT2046_ReadAdc_Smooth_XY ( strType_XPT2046_Coordinate * pScreenC
 
 		ucCount ++;
 
-	} while ( ( macXPT2046_EXTI_Read() == macXPT2046_EXTI_ActiveLevel ) && ( ucCount < 9 ) ); 	//?嚙�?????????????TP_INT_IN?z???? ???? ucCount<9*/
+	} while ( ( macXPT2046_EXTI_Read() == macXPT2046_EXTI_ActiveLevel ) && ( ucCount < 9 ) ); 	//?��蕭?????????????TP_INT_IN?z???? ???? ucCount<9*/
 
 
 
@@ -200,9 +202,9 @@ static uint8_t XPT2046_ReadAdc_Smooth_XY ( strType_XPT2046_Coordinate * pScreenC
 	return 0;
 }
 
-#else     
-static uint8_t XPT2046_ReadAdc_Smooth_XY ( strType_XPT2046_Coordinate * pScreenCoordinate )
-{
+#else
+static uint8_t XPT2046_ReadAdc_Smooth_XY(
+		strType_XPT2046_Coordinate *pScreenCoordinate) {
 	uint8_t ucCount = 0, i;
 
 	int16_t sAD_X, sAD_Y;
@@ -355,70 +357,95 @@ uint8_t XPT2046_Touch_Calibrate(void) {
 
 	  #endif
 
-		strCrossCoordinate [ 0 ] .x = usScreenWidth >> 2;
-		strCrossCoordinate [ 0 ] .y = usScreenHeigth >> 2;
+	strCrossCoordinate[0].x = usScreenWidth >> 2;
+	strCrossCoordinate[0].y = usScreenHeigth >> 2;
 
-		strCrossCoordinate [ 1 ] .x = strCrossCoordinate [ 0 ] .x;
-		strCrossCoordinate [ 1 ] .y = ( usScreenHeigth * 3 ) >> 2;
+	strCrossCoordinate[1].x = strCrossCoordinate[0].x;
+	strCrossCoordinate[1].y = (usScreenHeigth * 3) >> 2;
 
-		strCrossCoordinate [ 2 ] .x = ( usScreenWidth * 3 ) >> 2;
-		strCrossCoordinate [ 2 ] .y = strCrossCoordinate [ 1 ] .y;
+	strCrossCoordinate[2].x = (usScreenWidth * 3) >> 2;
+	strCrossCoordinate[2].y = strCrossCoordinate[1].y;
 
-		strCrossCoordinate [ 3 ] .x = strCrossCoordinate [ 2 ] .x;
-		strCrossCoordinate [ 3 ] .y = strCrossCoordinate [ 0 ] .y;
+	strCrossCoordinate[3].x = strCrossCoordinate[2].x;
+	strCrossCoordinate[3].y = strCrossCoordinate[0].y;
 
-		for ( i = 0; i < 4; i ++ )
-		{
-			LCD_Clear ( 0, 0, usScreenWidth, usScreenHeigth, BACKGROUND );
+	for (i = 0; i < 4; i++) {
+		LCD_Clear(0, 0, usScreenWidth, usScreenHeigth, BACKGROUND);
 
-			pStr = "Touch Calibrate ......";
-			LCD_DrawString(( usScreenWidth - ( strlen ( pStr ) - 7 ) * WIDTH_EN_CHAR ) >> 1, usScreenHeigth >> 1, pStr);
-			sprintf ( cStr, "%d", i + 1 );
-			LCD_DrawString(usScreenWidth >> 1, ( usScreenHeigth >> 1 ) - HEIGHT_EN_CHAR, cStr);
-			XPT2046_DelayUS ( 100000 );
+		pStr = "Touch Calibrate ......";
+		LCD_DrawString(
+				(usScreenWidth - (strlen(pStr) - 7) * WIDTH_EN_CHAR) >> 1,
+				usScreenHeigth >> 1, pStr);
+		sprintf(cStr, "%d", i + 1);
+		LCD_DrawString(usScreenWidth >> 1,
+				(usScreenHeigth >> 1) - HEIGHT_EN_CHAR, cStr);
+		XPT2046_DelayUS(100000);
 
-			while ( ! XPT2046_ReadAdc_Smooth_XY ( & strScreenSample [ i ] ) );
-		}
+		while (!XPT2046_ReadAdc_Smooth_XY(&strScreenSample[i]))
+			;
+	}
 
-		XPT2046_Calculate_CalibrationFactor ( strCrossCoordinate, strScreenSample, & CalibrationFactor ) ;
+	XPT2046_Calculate_CalibrationFactor(strCrossCoordinate, strScreenSample,
+			&CalibrationFactor);
 
-		if ( CalibrationFactor .Divider == 0 ) goto Failure;
+	if (CalibrationFactor.Divider == 0)
+		goto Failure;
 
-		usTest_x = ( ( CalibrationFactor .An * strScreenSample [ 3 ] .x ) + ( CalibrationFactor .Bn * strScreenSample [ 3 ] .y ) + CalibrationFactor .Cn ) / CalibrationFactor .Divider;
-		usTest_y = ( ( CalibrationFactor .Dn * strScreenSample [ 3 ] .x ) + ( CalibrationFactor .En * strScreenSample [ 3 ] .y ) + CalibrationFactor .Fn ) / CalibrationFactor .Divider;
+	usTest_x = ((CalibrationFactor.An * strScreenSample[3].x)
+			+ (CalibrationFactor.Bn * strScreenSample[3].y)
+			+ CalibrationFactor.Cn) / CalibrationFactor.Divider;
+	usTest_y = ((CalibrationFactor.Dn * strScreenSample[3].x)
+			+ (CalibrationFactor.En * strScreenSample[3].y)
+			+ CalibrationFactor.Fn) / CalibrationFactor.Divider;
 
-		usGap_x = ( usTest_x > strCrossCoordinate [ 3 ] .x ) ? ( usTest_x - strCrossCoordinate [ 3 ] .x ) : ( strCrossCoordinate [ 3 ] .x - usTest_x );
-		usGap_y = ( usTest_y > strCrossCoordinate [ 3 ] .y ) ? ( usTest_y - strCrossCoordinate [ 3 ] .y ) : ( strCrossCoordinate [ 3 ] .y - usTest_y );
+	usGap_x =
+			(usTest_x > strCrossCoordinate[3].x) ?
+					(usTest_x - strCrossCoordinate[3].x) :
+					(strCrossCoordinate[3].x - usTest_x);
+	usGap_y =
+			(usTest_y > strCrossCoordinate[3].y) ?
+					(usTest_y - strCrossCoordinate[3].y) :
+					(strCrossCoordinate[3].y - usTest_y);
 
-    if ( ( usGap_x > 10 ) || ( usGap_y > 10 ) ) goto Failure;
+	if ((usGap_x > 10) || (usGap_y > 10))
+		goto Failure;
 
-		strXPT2046_TouchPara .dX_X = ( CalibrationFactor .An * 1.0 ) / CalibrationFactor .Divider;
-		strXPT2046_TouchPara .dX_Y = ( CalibrationFactor .Bn * 1.0 ) / CalibrationFactor .Divider;
-		strXPT2046_TouchPara .dX   = ( CalibrationFactor .Cn * 1.0 ) / CalibrationFactor .Divider;
+	strXPT2046_TouchPara.dX_X = (CalibrationFactor.An * 1.0)
+			/ CalibrationFactor.Divider;
+	strXPT2046_TouchPara.dX_Y = (CalibrationFactor.Bn * 1.0)
+			/ CalibrationFactor.Divider;
+	strXPT2046_TouchPara.dX = (CalibrationFactor.Cn * 1.0)
+			/ CalibrationFactor.Divider;
 
-		strXPT2046_TouchPara .dY_X = ( CalibrationFactor .Dn * 1.0 ) / CalibrationFactor .Divider;
-		strXPT2046_TouchPara .dY_Y = ( CalibrationFactor .En * 1.0 ) / CalibrationFactor .Divider;
-		strXPT2046_TouchPara .dY   = ( CalibrationFactor .Fn * 1.0 ) / CalibrationFactor .Divider;
+	strXPT2046_TouchPara.dY_X = (CalibrationFactor.Dn * 1.0)
+			/ CalibrationFactor.Divider;
+	strXPT2046_TouchPara.dY_Y = (CalibrationFactor.En * 1.0)
+			/ CalibrationFactor.Divider;
+	strXPT2046_TouchPara.dY = (CalibrationFactor.Fn * 1.0)
+			/ CalibrationFactor.Divider;
 
-	#endif
+#endif
 
-	LCD_Clear ( 0, 0, usScreenWidth, usScreenHeigth, BACKGROUND );
+	LCD_Clear(0, 0, usScreenWidth, usScreenHeigth, BACKGROUND);
 
 	pStr = "Calibrate Succed";
-  LCD_DrawString(( usScreenWidth - strlen ( pStr ) * WIDTH_EN_CHAR ) >> 1, usScreenHeigth >> 1, pStr);
-  XPT2046_DelayUS ( 200000 );
+	LCD_DrawString((usScreenWidth - strlen(pStr) * WIDTH_EN_CHAR) >> 1,
+			usScreenHeigth >> 1, pStr);
+	XPT2046_DelayUS(200000);
 	return 1;
 
 	Failure:
-	
-	LCD_Clear ( 0, 0, usScreenWidth, usScreenHeigth, BACKGROUND ); 
-	
+
+	LCD_Clear(0, 0, usScreenWidth, usScreenHeigth, BACKGROUND);
+
 	pStr = "Calibrate fail";
-	LCD_DrawString(( usScreenWidth - strlen ( pStr ) * WIDTH_EN_CHAR ) >> 1, usScreenHeigth >> 1, pStr);
+	LCD_DrawString((usScreenWidth - strlen(pStr) * WIDTH_EN_CHAR) >> 1,
+			usScreenHeigth >> 1, pStr);
 	pStr = "try again";
-	LCD_DrawString(( usScreenWidth - strlen ( pStr ) * WIDTH_EN_CHAR ) >> 1, ( usScreenHeigth >> 1 ) + HEIGHT_EN_CHAR, pStr) ;
-	XPT2046_DelayUS ( 1000000 );		
-	
+	LCD_DrawString((usScreenWidth - strlen(pStr) * WIDTH_EN_CHAR) >> 1,
+			(usScreenHeigth >> 1) + HEIGHT_EN_CHAR, pStr);
+	XPT2046_DelayUS(1000000);
+
 	return 0;
 }
 
@@ -444,32 +471,29 @@ uint8_t XPT2046_Get_TouchedPoint(strType_XPT2046_Coordinate *pDisplayCoordinate,
 
 void Check_touchkey(void) {
 	//strType_XPT2046_Coordinate strDisplayCoordinate;
-	strType_XPT2046_Coordinate TP_Coordinate;
-	trace_printf("%d\t%d\n", TP_Coordinate.x, TP_Coordinate.y);
-	if (XPT2046_Get_TouchedPoint(&TP_Coordinate,
-			&strXPT2046_TouchPara)) {
-		if ((TP_Coordinate.y >= 296) && (TP_Coordinate.y < 312)) {
-			if ((TP_Coordinate.x >= 62)
-					&& (TP_Coordinate.x < 78)) {
-				//Last song
-			} else if ((TP_Coordinate.x >= 112)
-					&& (TP_Coordinate.x < 128)) {
-				if (status == Pause) {
-					HAL_TIM_Base_Start(&htim2);
-					status = Play;
-				} else if (status == Play) {
-					HAL_TIM_Base_Stop(&htim2);
-					status = Pause;
-				}
-				trace_printf("End Fucking\n");
-				Update_Button(status);
-				trace_printf("Play/Pause");
 
-			} else if ((TP_Coordinate.x >= 162)
-					&& (TP_Coordinate.x < 178)) {
-				//Next song
+//	if (XPT2046_Get_TouchedPoint(&TP_Coordinate, &strXPT2046_TouchPara)) {
+	trace_printf("%d\t%d\n", TP_Coordinate.x, TP_Coordinate.y);
+	if ((TP_Coordinate.y >= 296) && (TP_Coordinate.y < 312)) {
+		trace_printf("y OK\n");
+		if ((TP_Coordinate.x >= 62) && (TP_Coordinate.x < 78)) {
+			//Last song
+		} else if ((TP_Coordinate.x >= 112) && (TP_Coordinate.x < 128)) {
+			if (status == Pause) {
+				HAL_TIM_Base_Start(&htim2);
+				status = Play;
+			} else if (status == Play) {
+				HAL_TIM_Base_Stop(&htim2);
+				status = Pause;
 			}
+			trace_printf("End Fucking\n");
+			Update_Button(status);
+			trace_printf("Play/Pause\n");
+
+		} else if ((TP_Coordinate.x >= 162) && (TP_Coordinate.x < 178)) {
+			//Next song
 		}
 	}
+//	}
 }
 
