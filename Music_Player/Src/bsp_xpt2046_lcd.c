@@ -3,6 +3,10 @@
 #include <stdio.h>
 #include <string.h>
 
+//static void                   XPT2046_EXTI_Config                   ( void );
+//static void                   XPT2046_EXTI_NVIC_Config              ( void );
+//static void                   XPT2046_GPIO_SPI_Config               ( void );
+
 static void XPT2046_DelayUS( __IO uint32_t ulCount);
 static void XPT2046_WriteCMD(uint8_t ucCmd);
 static uint16_t XPT2046_ReadCMD(void);
@@ -15,17 +19,10 @@ static uint8_t XPT2046_Calculate_CalibrationFactor(
 		strType_XPT2046_Coordinate *pScreenSample,
 		strType_XPT2046_Calibration *pCalibrationFactor);
 
-extern TIM_HandleTypeDef htim2;
-extern enum stat status;
-
-strType_XPT2046_TouchPara strXPT2046_TouchPara = { 0.001030, 0.064188,
-		-10.804098, -0.085584, 0.001420, 324.127036 };
-
-//{ 0.085958, -0.001073, -4.979353, -0.001750, 0.065168, -13.318824};
+strType_XPT2046_TouchPara strXPT2046_TouchPara = //{ 0.085958, -0.001073, -4.979353, -0.001750, 0.065168, -13.318824 };
+		{ 0.001030, 0.064188, -10.804098, -0.085584, 0.001420, 324.127036 };
 
 volatile uint8_t ucXPT2046_TouchFlag = 0;
-
-//GPIO_InitTypeDef GPIO_InitStructure;
 
 static void XPT2046_DelayUS( __IO uint32_t ulCount) {
 	uint32_t i;
@@ -370,14 +367,14 @@ uint8_t XPT2046_Touch_Calibrate(void) {
 	strType_XPT2046_Calibration CalibrationFactor;
 
 #if ( macXPT2046_Coordinate_GramScan == 1 ) || ( macXPT2046_Coordinate_GramScan == 4 )
-	usScreenWidth = LCD_Default_Max_PAGE;
-	usScreenHeigth = LCD_Default_Max_COLUMN;
+	usScreenWidth = LCD_Default_Max_COLUMN;
+	usScreenHeigth = LCD_Default_Max_PAGE;
 
 #elif ( macXPT2046_Coordinate_GramScan == 2 ) || ( macXPT2046_Coordinate_GramScan == 3 )
- usScreenWidth = LCD_Default_Max_Heigth;
- usScreenHeigth = LCD_Default_Max_Width;
+	    usScreenWidth = LCD_Default_Max_Heigth;
+	    usScreenHeigth = LCD_Default_Max_Width;
 
- #endif
+	  #endif
 
 	strCrossCoordinate[0].x = usScreenWidth >> 2;
 	strCrossCoordinate[0].y = usScreenHeigth >> 2;
@@ -395,10 +392,12 @@ uint8_t XPT2046_Touch_Calibrate(void) {
 		LCD_Clear(0, 0, usScreenWidth, usScreenHeigth, BACKGROUND);
 
 		pStr = "Touch Calibrate ......";
+
 		LCD_DrawString(
 				(usScreenWidth - (strlen(pStr) - 7) * WIDTH_EN_CHAR) >> 1,
 				usScreenHeigth >> 1, pStr);
 		sprintf(cStr, "%d", i + 1);
+
 		LCD_DrawString(usScreenWidth >> 1,
 				(usScreenHeigth >> 1) - HEIGHT_EN_CHAR, cStr);
 
@@ -453,6 +452,7 @@ uint8_t XPT2046_Touch_Calibrate(void) {
 	LCD_Clear(0, 0, usScreenWidth, usScreenHeigth, BACKGROUND);
 
 	pStr = "Calibrate Succed";
+
 	LCD_DrawString((usScreenWidth - strlen(pStr) * WIDTH_EN_CHAR) >> 1,
 			usScreenHeigth >> 1, pStr);
 
@@ -465,6 +465,7 @@ uint8_t XPT2046_Touch_Calibrate(void) {
 	LCD_Clear(0, 0, usScreenWidth, usScreenHeigth, BACKGROUND);
 
 	pStr = "Calibrate fail";
+
 	LCD_DrawString((usScreenWidth - strlen(pStr) * WIDTH_EN_CHAR) >> 1,
 			usScreenHeigth >> 1, pStr);
 
@@ -472,6 +473,7 @@ uint8_t XPT2046_Touch_Calibrate(void) {
 	LCD_DrawString((usScreenWidth - strlen(pStr) * WIDTH_EN_CHAR) >> 1,
 			(usScreenHeigth >> 1) + HEIGHT_EN_CHAR, pStr);
 	XPT2046_DelayUS(1000000);
+
 	return 0;
 
 }
