@@ -508,7 +508,7 @@ uint8_t XPT2046_Get_TouchedPoint ( strType_XPT2046_Coordinate * pDisplayCoordina
 void Check_touchkey(void)
 {
 		strType_XPT2046_Coordinate strDisplayCoordinate;
-	
+	trace_printf("FUCKKKKKKKKKKKKKK");
 	if ( XPT2046_Get_TouchedPoint ( & strDisplayCoordinate, & strXPT2046_TouchPara ) )
 	{
 		if ( ( strDisplayCoordinate .y > 232 ) && ( strDisplayCoordinate .y < 282 ) )
