@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "player.h"
+#include "Trace.h"
 
 //static void                   XPT2046_EXTI_Config                   ( void );
 //static void                   XPT2046_EXTI_NVIC_Config              ( void );
@@ -474,9 +475,9 @@ uint8_t XPT2046_Get_TouchedPoint(strType_XPT2046_Coordinate *pDisplayCoordinate,
 }
 
 void Check_touchkey(void) {
-//	trace_printf("%d\t%d\n", TP_Coordinate.x, TP_Coordinate.y);
+	trace_printf("%d\t%d\n", TP_Coordinate.x, TP_Coordinate.y);
 	if ((TP_Coordinate.y >= 280) && (TP_Coordinate.y < 320)) {
-//		trace_printf("y OK\n");
+		trace_printf("y OK\n");
 		if ((TP_Coordinate.x >= 55) && (TP_Coordinate.x < 85)) {
 			//next song
 			closefile();
@@ -486,7 +487,7 @@ void Check_touchkey(void) {
 				strcat(file, "/");
 			playingCursor -= 1;
 			strcat(file, playingList[cursor]);
-//			trace_printf("%s\n", file);
+			trace_printf("%s\n", file);
 			player(file);
 			fileListUpdate();
 			LCD_OpenWindow(0, 278, 240, 16);
@@ -500,9 +501,9 @@ void Check_touchkey(void) {
 			} else if (status == Play) {
 				player_pause();
 			}
-//			trace_printf("End Fucking\n");
+			trace_printf("End Fucking\n");
 			Update_Button(status);
-//			trace_printf("Play/Pause\n");
+			trace_printf("Play/Pause\n");
 
 		}
 
@@ -515,7 +516,7 @@ void Check_touchkey(void) {
 				strcat(file, "/");
 			playingCursor += 1;
 			strcat(file, playingList[playingCursor]);
-//			trace_printf("%s\n", file);
+			trace_printf("%s\n", file);
 			player(file);
 			fileListUpdate();
 			LCD_OpenWindow(0, 278, 240, 16);

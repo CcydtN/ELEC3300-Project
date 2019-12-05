@@ -2,7 +2,7 @@
 #include "UI.h"
 #include "lcd.h"
 #include "string.h"
-//#include "Trace.h"
+#include "Trace.h"
 #include "ffconf.h"
 #include "player.h"
 
@@ -157,7 +157,7 @@ void cursorDown(void) {
 }
 
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
-	if (GPIO_Pin == GPIO_PIN_14) {
+	if (GPIO_Pin == GPIO_PIN_13) {
 		int temp = dir_open(currentList[cursor]);
 		if (temp != -1) {
 			count = temp;
