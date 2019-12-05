@@ -479,7 +479,7 @@ void Check_touchkey(void) {
 	if ((TP_Coordinate.y >= 280) && (TP_Coordinate.y < 320)) {
 		trace_printf("y OK\n");
 		if ((TP_Coordinate.x >= 55) && (TP_Coordinate.x < 85)) {
-			//next song
+			//last song
 			closefile();
 			char file[_MAX_LFN];
 			strcpy(file, path);
@@ -492,6 +492,8 @@ void Check_touchkey(void) {
 			LCD_OpenWindow(0, 278, 240, 16);
 			LCD_FillColor(240 * 16, WHITE);
 			LCD_DrawString(8, 278, playingList[playingCursor]);
+			LCD_DrawLine(20, 267, 220, 267, BLACK);
+			LCD_DrawLine(20, 268, 220, 268, BLACK);
 		}
 
 		else if ((TP_Coordinate.x >= 105) && (TP_Coordinate.x < 135)) {
@@ -520,6 +522,8 @@ void Check_touchkey(void) {
 			LCD_OpenWindow(0, 278, 240, 16);
 			LCD_FillColor(240 * 16, WHITE);
 			LCD_DrawString(8, 278, playingList[playingCursor]);
+			LCD_DrawLine(20, 267, 220, 267, BLACK);
+			LCD_DrawLine(20, 268, 220, 268, BLACK);
 		}
 	}
 }

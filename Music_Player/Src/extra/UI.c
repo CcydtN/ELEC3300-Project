@@ -189,6 +189,17 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
 			LCD_OpenWindow(0, 278, 240, 16);
 			LCD_FillColor(240 * 16, WHITE);
 			LCD_DrawString(8, 278, currentList[cursor]);
+			LCD_DrawLine(20, 267, 220, 267, BLACK);
+			LCD_DrawLine(20, 268, 220, 268, BLACK);
 		}
 	}
+}
+
+void bar_update() {
+	int persentage = (getTimePercentage());
+//	trace_printf("%d\n", persentage);
+//	LCD_DrawDot(20 + persentage, 267, RED);
+//	LCD_DrawDot(20 + persentage, 268, RED);
+	LCD_DrawLine(20, 267, 20 + persentage, 267, RED);
+	LCD_DrawLine(20, 268, 20 + persentage, 268, RED);
 }

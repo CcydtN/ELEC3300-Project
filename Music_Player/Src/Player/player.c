@@ -399,12 +399,15 @@ bool End(void) {
 	}
 }
 
-float getTimePercentage() {
+int getTimePercentage() {
+	float result;
 	if (type == wav) {
-		return bytes_finish / header.data.size;
+		result = ((float) bytes_finish / (float) header.data.size) * 200;
 	} else if (type == ogg) {
-		return ov_time_tell(&vf) / (1000 * ov_time_total(&vf, -1));
+		result = ((float) (ov_pcm_tell(&vf)) / (float) (ov_pcm_total(&vf, -1)))
+				* 200;
 	}
+	return ((int) result);
 }
 
 int getStatus(void) {

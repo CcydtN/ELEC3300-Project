@@ -108,9 +108,9 @@ void TIM_reINIT(uint16_t sampleRate);
 
 bool End(void);
 
-float getTimePercentage();
+int getTimePercentage(void);
 
-int getStatus();
+int getStatus(void);
 
 void setStatus(enum stat input);
 
