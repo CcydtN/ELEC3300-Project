@@ -489,7 +489,6 @@ void Check_touchkey(void) {
 			strcat(file, playingList[cursor]);
 			trace_printf("%s\n", file);
 			player(file);
-			fileListUpdate();
 			LCD_OpenWindow(0, 278, 240, 16);
 			LCD_FillColor(240 * 16, WHITE);
 			LCD_DrawString(8, 278, playingList[playingCursor]);
@@ -497,9 +496,9 @@ void Check_touchkey(void) {
 
 		else if ((TP_Coordinate.x >= 105) && (TP_Coordinate.x < 135)) {
 			if (getStatus()) {
-				player_play();
-			} else if (status == Play) {
 				player_pause();
+			} else if (status == Play) {
+				player_play();
 			}
 			trace_printf("End Fucking\n");
 			Update_Button(status);
@@ -518,10 +517,9 @@ void Check_touchkey(void) {
 			strcat(file, playingList[playingCursor]);
 			trace_printf("%s\n", file);
 			player(file);
-			fileListUpdate();
 			LCD_OpenWindow(0, 278, 240, 16);
 			LCD_FillColor(240 * 16, WHITE);
-			LCD_DrawString(8, 278, currentList[playingCursor]);
+			LCD_DrawString(8, 278, playingList[playingCursor]);
 		}
 	}
 }
