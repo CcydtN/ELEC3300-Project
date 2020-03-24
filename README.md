@@ -39,4 +39,4 @@ It is a project that play music on stm32f103ve development board.
 
 ### Photo of Final Product
 
-<img src="https://github.com/pynnek/ELEC3300_DEPRECATED/blob/master/others/photo1.jpg?raw=true" style="zoom:50%;transform:rotate(90deg)" />
+<img src="https://github.com/pynnek/ELEC3300_DEPRECATED/raw/master/others/photo1.jpg" />
