@@ -37,6 +37,10 @@ It is a project that play music on stm32f103ve development board.
 >
 > maybe due to the memory usage cause only file with low compression rate can be play
 
+### Open source Library Used
+
+- tremor (low-memory branch) - https://git.xiph.org/?p=tremor.git
+
 ### Photo of Final Product
 
 <img src="https://github.com/pynnek/ELEC3300_DEPRECATED/raw/master/others/photo1.jpg" />
