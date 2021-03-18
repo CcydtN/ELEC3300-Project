@@ -6,6 +6,8 @@ It is a project that play music on stm32f103ve development board.
 
 ​	In **Resource** folder, there are some link to resource we use and some reference.
 
+Backup from https://github.com/cklawac/elec3300
+
 ## What it do
 
 - Play music that store in a SD card with DAC w/ DMA
