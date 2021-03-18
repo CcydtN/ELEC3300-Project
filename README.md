@@ -1,4 +1,4 @@
-# Music Player (DEPRECATED)
+# Music Player
 
 It is a project that play music on stm32f103ve development board.
 
